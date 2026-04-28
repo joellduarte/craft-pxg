@@ -722,6 +722,14 @@ input[type="number"] {
   color: var(--text-1);
   font-size: 0.75rem;
 }
+.craft-resources .res-hint {
+  margin-left: 28px;
+  margin-top: -2px;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-2);
+  opacity: 0.75;
+}
 
 /* Sale inputs */
 .craft-sale {

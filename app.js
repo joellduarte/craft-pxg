@@ -20,6 +20,16 @@
   const POTION_PER_RECIPE = 100;
   const POTION_TIPO = "poção";
 
+  // Recursos derivados: cada Medicinal Leaf gera 4 Crushed Leaf.
+  // Usado para mostrar uma dica auxiliar ("≈ X medicinal leaves") nos crafts
+  // que pedem crushed leaf, sem alterar a receita em si.
+  const CRUSHED_LEAF_SOURCES = {
+    "Red Crushed Leaf": "Red Medicinal Leaves",
+    "Yellow Crushed Leaf": "Yellow Medicinal Leaves",
+    "Green Crushed Leaf": "Green Medicinal Leaf",
+  };
+  const CRUSHED_PER_LEAF = 4;
+
   // ---------- Estado ----------
   /**
    * state = {
@@ -584,6 +594,15 @@
       row.appendChild(rname);
       row.appendChild(rcost);
       resourcesBox.appendChild(row);
+
+      if (CRUSHED_LEAF_SOURCES[r.nome]) {
+        const hint = document.createElement("div");
+        hint.className = "res-hint";
+        hint.dataset.role = "res-hint";
+        hint.dataset.source = CRUSHED_LEAF_SOURCES[r.nome];
+        hint.textContent = "";
+        resourcesBox.appendChild(hint);
+      }
     }
     card.appendChild(resourcesBox);
 
@@ -802,6 +821,17 @@
         costEl.textContent = formatBR(c.subtotal);
       } else {
         costEl.textContent = "—";
+      }
+
+      const hintEl = row.nextElementSibling;
+      if (hintEl && hintEl.dataset && hintEl.dataset.role === "res-hint") {
+        const totalQty = r.quantidade * calc.quantity;
+        const leaves = totalQty / CRUSHED_PER_LEAF;
+        const rounded = Math.round(leaves * 100) / 100;
+        const txt = Number.isInteger(rounded)
+          ? String(rounded)
+          : rounded.toString().replace(".", ",");
+        hintEl.textContent = `≈ ${txt} ${hintEl.dataset.source}`;
       }
     });
 
