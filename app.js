@@ -899,10 +899,15 @@
     for (const card of cards) {
       const id = card.dataset.craftId;
       const okSelection = !selectionAll || selectionAll.has(id);
-      const okRank = !rank || card.dataset.rank === rank;
-      const okTipo = !tipo || card.dataset.tipo === tipo;
-      const okBerrie = !onlyBerrie || card.dataset.berrie === "true";
-      const okSearch = !q || card.dataset.name.includes(q);
+      // Sub-receitas de itens selecionados ignoram busca/filtros quando
+      // "ver selecionados" está ativo — elas aparecem por dependência.
+      const isPureDep =
+        !!selectionAll && currentDepsSet.has(id) && !isSelected(id);
+      const okRank = isPureDep || !rank || card.dataset.rank === rank;
+      const okTipo = isPureDep || !tipo || card.dataset.tipo === tipo;
+      const okBerrie =
+        isPureDep || !onlyBerrie || card.dataset.berrie === "true";
+      const okSearch = isPureDep || !q || card.dataset.name.includes(q);
       const show = okSelection && okRank && okTipo && okBerrie && okSearch;
       card.classList.toggle("hidden", !show);
 
