@@ -19,6 +19,8 @@
   // Cada receita de poção gera 100 unidades.
   const POTION_PER_RECIPE = 100;
   const POTION_TIPO = "poção";
+  // Rótulos de rank que não seguem o padrão "Rank X" na badge.
+  const RANK_LABELS = { ZAME: "NPC Zame" };
 
   // Recursos derivados: cada Medicinal Leaf gera 4 Crushed Leaf.
   // Usado para mostrar uma dica auxiliar ("≈ X medicinal leaves") nos crafts
@@ -494,6 +496,9 @@
     card.dataset.tipo = craft.tipo;
     card.dataset.berrie = String(!!craft.isBerrie);
     card.dataset.name = craft.nome.toLowerCase();
+    card.dataset.resources = craft.recursos
+      .map((r) => r.nome.toLowerCase())
+      .join("|");
     if (isSelected(craft.id)) card.classList.add("is-selected");
 
     // Botão estrela (seleção)
@@ -529,7 +534,7 @@
 
     const tagRank = document.createElement("span");
     tagRank.className = `tag tag-rank tag-rank-${craft.rank}`;
-    tagRank.textContent = `Rank ${craft.rank}`;
+    tagRank.textContent = RANK_LABELS[craft.rank] || `Rank ${craft.rank}`;
     meta.appendChild(tagRank);
 
     const tagTipo = document.createElement("span");
@@ -916,6 +921,10 @@
       .getElementById("searchCraft")
       .value.trim()
       .toLowerCase();
+    const qRes = document
+      .getElementById("searchCraftResource")
+      .value.trim()
+      .toLowerCase();
 
     // currentDepsSet já está computado a partir da seleção atual.
     // selectionAll = selecionados ∪ deps (usado apenas pelo filtro "ver selecionados").
@@ -938,7 +947,10 @@
       const okBerrie =
         isPureDep || !onlyBerrie || card.dataset.berrie === "true";
       const okSearch = isPureDep || !q || card.dataset.name.includes(q);
-      const show = okSelection && okRank && okTipo && okBerrie && okSearch;
+      const okResSearch =
+        isPureDep || !qRes || (card.dataset.resources || "").includes(qRes);
+      const show =
+        okSelection && okRank && okTipo && okBerrie && okSearch && okResSearch;
       card.classList.toggle("hidden", !show);
 
       // is-dependency vale sempre que o craft é sub-receita de algum selecionado
@@ -1104,6 +1116,9 @@
       .addEventListener("change", applyCraftFilters);
     document
       .getElementById("searchCraft")
+      .addEventListener("input", applyCraftFilters);
+    document
+      .getElementById("searchCraftResource")
       .addEventListener("input", applyCraftFilters);
     document
       .getElementById("searchResource")

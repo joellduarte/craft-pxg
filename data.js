@@ -2633,6 +2633,220 @@ const CRAFTS = [
       { nome: "Beetle Horn", quantidade: 2, imagem: "https://wiki.pokexgames.com/images/a/a7/Beetle_Horn.png" }
     ]
   },
+  // ============================================================
+  // NPC Zame — Professores nível 120 (mesmas berries do rank B,
+  // porém com recursos diferentes). Rank "ZAME".
+  // Comum a todas: 1 Nightmare Seed Bag + 30 Darkrai Essence.
+  // ============================================================
+  {
+    id: "chilan-seed-zame",
+    nome: "Chilan Seed",
+    imagem: "https://wiki.pokexgames.com/images/3/3f/Chilan_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Royal Mane", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/2/20/Royal_Mane.png" }
+    ]
+  },
+  {
+    id: "babiri-seed-zame",
+    nome: "Babiri Seed",
+    imagem: "https://wiki.pokexgames.com/images/e/e7/Babiri_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Black Lucky Charm", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/b/b0/Black_Lucky_Charm.png" }
+    ]
+  },
+  {
+    id: "colbur-seed-zame",
+    nome: "Colbur Seed",
+    imagem: "https://wiki.pokexgames.com/images/8/8c/Colbur_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Black Wool Ball", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/0/06/Black_Wool_Ball.png" }
+    ]
+  },
+  {
+    id: "roseli-seed-zame",
+    nome: "Roseli Seed",
+    imagem: "https://wiki.pokexgames.com/images/d/d3/Roseli_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Corrupted Dog Ear", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/0/07/Corruption_Dog_Ear.gif" }
+    ]
+  },
+  {
+    id: "haban-seed-zame",
+    nome: "Haban Seed",
+    imagem: "https://wiki.pokexgames.com/images/b/b3/Haban_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Land Shark Horn", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/a/a8/Land_Shark_Horn.png" }
+    ]
+  },
+  {
+    id: "kasib-seed-zame",
+    nome: "Kasib Seed",
+    imagem: "https://wiki.pokexgames.com/images/8/80/Kasib_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Blue Ghost Candle", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/61/Blue_Ghost_Candle.png" }
+    ]
+  },
+  {
+    id: "charti-seed-zame",
+    nome: "Charti Seed",
+    imagem: "https://wiki.pokexgames.com/images/1/11/Charti_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Wolf Tail", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/d/dd/Wolf_Tail.png" }
+    ]
+  },
+  {
+    id: "tanga-seed-zame",
+    nome: "Tanga Seed",
+    imagem: "https://wiki.pokexgames.com/images/f/f0/Tanga_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Corrupted Pot of Moss Bug", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/b/b7/Corrupted_Pot_Of_Moss_Bug.gif" }
+    ]
+  },
+  {
+    id: "payapa-seed-zame",
+    nome: "Payapa Seed",
+    imagem: "https://wiki.pokexgames.com/images/e/e4/Payapa_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Feline Fur", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/a/ab/Feline_Fur.png" }
+    ]
+  },
+  {
+    id: "coba-seed-zame",
+    nome: "Coba Seed",
+    imagem: "https://wiki.pokexgames.com/images/2/27/Coba_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Small Eagle Feather", quantidade: 2, imagem: "https://wiki.pokexgames.com/images/e/e7/Small_Eagle_Feather.png" }
+    ]
+  },
+  {
+    id: "shuca-seed-zame",
+    nome: "Shuca Seed",
+    imagem: "https://wiki.pokexgames.com/images/e/e3/Shuca_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Sand Pouch", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/b/bf/Sand_Pouch.png" }
+    ]
+  },
+  {
+    id: "kebia-seed-zame",
+    nome: "Kebia Seed",
+    imagem: "https://wiki.pokexgames.com/images/0/03/Kebia_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Toxic Gosme", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/c/ca/Toxic_Gosme.png" }
+    ]
+  },
+  {
+    id: "chople-seed-zame",
+    nome: "Chople Seed",
+    imagem: "https://wiki.pokexgames.com/images/b/b4/Chople_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Corrupted Champion Belt", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6b/Corrupted-Belt-of-Champion.gif" }
+    ]
+  },
+  {
+    id: "yache-seed-zame",
+    nome: "Yache Seed",
+    imagem: "https://wiki.pokexgames.com/images/f/f1/Yache_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Corrupted Ice Orb", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/3/3f/Corrupted-Ice-Orb.gif" }
+    ]
+  },
+  {
+    id: "rindo-seed-zame",
+    nome: "Rindo Seed",
+    imagem: "https://wiki.pokexgames.com/images/9/9a/Rindo_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Petite Leaves", quantidade: 2, imagem: "https://wiki.pokexgames.com/images/e/e4/Petite_Leaves.png" }
+    ]
+  },
+  {
+    id: "wacan-seed-zame",
+    nome: "Wacan Seed",
+    imagem: "https://wiki.pokexgames.com/images/9/90/Wacan_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Elefish Fin", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/1/1f/Elefish_Fin.png" }
+    ]
+  },
+  {
+    id: "passho-seed-zame",
+    nome: "Passho Seed",
+    imagem: "https://wiki.pokexgames.com/images/5/58/Passho_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Savage Fin", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/9/9e/Savage_Fin.png" }
+    ]
+  },
+  {
+    id: "occa-seed-zame",
+    nome: "Occa Seed",
+    imagem: "https://wiki.pokexgames.com/images/9/9f/Occa_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Fire Monkey Hair", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/7/7f/Fire_Monkey_Hair.png" }
+    ]
+  },
+  {
+    id: "lum-seed-zame",
+    nome: "Lum Seed",
+    imagem: "https://wiki.pokexgames.com/images/4/43/Lum_Seed.png",
+    tipo: "semente", rank: "ZAME", skill: 120, isBerrie: true,
+    recursos: [
+      { nome: "Nightmare Seed Bag", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/6/6a/Nightmare-Seed-Bag.gif" },
+      { nome: "Darkrai Essence", quantidade: 30, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
+      { nome: "Nightmare Gem", quantidade: 21, imagem: "https://wiki.pokexgames.com/images/0/01/Nightmare_Gem.png" }
+    ]
+  },
 ];
 
 if (typeof window !== "undefined") window.CRAFTS = CRAFTS;

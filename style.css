@@ -37,6 +37,7 @@
   --rank-B: #a855f7;
   --rank-A: #f97316;
   --rank-S: #ef4444;
+  --rank-ZAME: #ec4899;
 
   --radius-sm: 6px;
   --radius: 10px;
@@ -454,6 +455,9 @@ input[type="number"] {
 .filter-flag {
   align-self: center;
 }
+.filter-selection-check {
+  margin-left: 8px;
+}
 .filter-selection .selection-actions {
   display: flex;
   gap: 6px;
@@ -673,6 +677,7 @@ input[type="number"] {
 .tag-rank-B { background: var(--rank-B); }
 .tag-rank-A { background: var(--rank-A); }
 .tag-rank-S { background: var(--rank-S); }
+.tag-rank-ZAME { background: var(--rank-ZAME); }
 .tag-berrie {
   background: var(--accent-soft);
   color: var(--accent);
