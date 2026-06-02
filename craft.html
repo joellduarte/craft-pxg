@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PXG Professor Craft Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="logo">
+        <a href="index.html" class="topbar-back" title="Voltar ao Hub">←</a>
+        <span class="logo-mark">PXG</span>
+        <span class="logo-text">Professor Craft Calculator</span>
+      </h1>
+      <div class="topbar-actions">
+        <span id="craftCount" class="badge">0 crafts</span>
+        <button id="btnReset" class="btn btn-ghost" type="button" title="Limpar todos os preços salvos">Limpar dados</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ============================================================
+         SIDEBAR ESQUERDA — Parâmetros gerais (sticky)
+         ============================================================ -->
+    <aside class="sidebar sidebar-left">
+      <section class="panel panel-params">
+        <header class="panel-header">
+          <h2>Parâmetros gerais</h2>
+          <p class="panel-sub">
+            Ajustes globais que afetam todos os cards.
+          </p>
+        </header>
+        <div class="panel-body">
+          <div class="field">
+            <label for="craftQty">Quantidade a craftar</label>
+            <input id="craftQty" type="number" min="1" step="1" placeholder="1" />
+            <small class="hint">Multiplica custos e receita em cada card.</small>
+          </div>
+
+          <div class="field">
+            <label for="taxMarket">Taxa do Market (%)</label>
+            <input id="taxMarket" type="number" min="0" max="100" step="0.1" placeholder="ex: 4" />
+            <small class="hint">Descontada do preço de venda no market.</small>
+          </div>
+
+          <div class="params-divider"></div>
+
+          <div class="subsection">
+            <h3>Berries — média padrão</h3>
+            <p class="subsection-sub">
+              Aplicada a todas as seeds, <strong>exceto</strong> Sitrus Seed e
+              Red Sitrus Seed (fixas em 2 / 2.5).
+            </p>
+            <div class="field">
+              <label for="berrieMedia">Média normal</label>
+              <input id="berrieMedia" type="number" min="0" step="0.1" placeholder="ex: 6" />
+            </div>
+            <div class="field">
+              <label for="berrieSorte">Média com sorte</label>
+              <input id="berrieSorte" type="number" min="0" step="0.1" placeholder="ex: 7" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ============================================================
+         COLUNA CENTRAL — Filtros + Crafts
+         ============================================================ -->
+    <section class="center-col">
+      <section class="panel panel-filters" aria-label="Filtros de crafts">
+        <div class="filters">
+          <div class="filter-group">
+            <label for="filterRank">Rank</label>
+            <select id="filterRank">
+              <option value="">Todos</option>
+              <option value="E">E</option>
+              <option value="D">D</option>
+              <option value="C">C</option>
+              <option value="B">B</option>
+              <option value="A">A</option>
+              <option value="S">S</option>
+              <option value="ZAME">NPC Zame</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterTipo">Tipo</label>
+            <select id="filterTipo">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group filter-search">
+            <label for="searchCraft">Buscar craft</label>
+            <input id="searchCraft" type="search" placeholder="Buscar por nome do craft..." />
+            <input id="searchCraftResource" type="search"
+              placeholder="Buscar por recurso da receita..." />
+          </div>
+          <div class="filter-group filter-selection">
+            <label>Seleção</label>
+            <div class="selection-actions">
+              <button id="btnToggleSelected" type="button" class="btn btn-ghost"
+                title="Mostrar apenas os selecionados e suas sub-receitas">
+                <span class="star-ico">★</span>
+                <span>Ver selecionados (<span id="selectedCount">0</span>)</span>
+              </button>
+              <button id="btnClearSelected" type="button" class="btn btn-ghost"
+                title="Limpar todos os selecionados">Limpar</button>
+              <label class="check filter-selection-check">
+                <input type="checkbox" id="filterBerrie" />
+                <span>Apenas Berries (Seeds)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-crafts" aria-label="Lista de crafts">
+        <div id="craftsGrid" class="crafts-grid">
+          <p class="loading">Carregando crafts...</p>
+        </div>
+        <p id="emptyState" class="empty hidden">Nenhum craft encontrado com esses filtros.</p>
+      </section>
+    </section>
+
+    <!-- ============================================================
+         SIDEBAR DIREITA — Preços dos recursos (sticky)
+         ============================================================ -->
+    <aside class="sidebar sidebar-right">
+      <section class="panel panel-resources">
+        <header class="panel-header">
+          <div class="panel-head-row">
+            <h2>Preços dos recursos</h2>
+          </div>
+          <input
+            id="searchResource"
+            type="search"
+            class="input-search input-search-full"
+            placeholder="Buscar recurso..." />
+        </header>
+        <div class="panel-body">
+          <div id="resourceInputs" class="resource-list">
+            <p class="loading">Carregando recursos...</p>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Dados extraídos da
+      <a href="https://wiki.pokexgames.com/index.php/Craft_Profiss%C3%B5es_-_Professor"
+         target="_blank" rel="noopener noreferrer">Wiki oficial PokeXGames</a>.
+      Projeto não oficial.
+    </p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

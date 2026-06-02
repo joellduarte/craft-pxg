@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Star Signs Tracker — PXG</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-star-signs">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="logo">
+        <a href="index.html" class="topbar-back" title="Voltar ao Hub">←</a>
+        <span class="logo-mark">PXG</span>
+        <span class="logo-text">Star Signs Tracker</span>
+      </h1>
+      <div class="topbar-actions">
+        <span id="totalBadge" class="badge total-badge">0 / 0 pts</span>
+        <button id="btnResetStars" class="btn btn-ghost" type="button" title="Desmarcar tudo">Limpar marcações</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="star-main">
+    <section class="star-builder-link panel">
+      <p>
+        <strong>Quer simular combinações?</strong>
+        Acesse o
+        <a href="https://wiki.pokexgames.com/index.php/Star_Signs" target="_blank" rel="noopener noreferrer">Star Signs Builder na wiki</a>.
+      </p>
+    </section>
+
+    <div id="starCategories" class="star-categories">
+      <p class="loading">Carregando pontos...</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Dados extraídos da
+      <a href="https://wiki.pokexgames.com/index.php/Star_Signs" target="_blank" rel="noopener noreferrer">Wiki oficial PokeXGames</a>.
+      Projeto não oficial.
+    </p>
+  </footer>
+
+  <script src="star-signs-data.js"></script>
+  <script src="star-signs.js"></script>
+</body>
+</html>

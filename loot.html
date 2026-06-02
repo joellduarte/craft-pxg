@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loot Tracker — PXG</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-loot">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="logo">
+        <a href="index.html" class="topbar-back" title="Voltar ao Hub">←</a>
+        <span class="logo-mark">PXG</span>
+        <span class="logo-text">Loot Tracker</span>
+      </h1>
+      <div class="topbar-actions">
+        <span id="resultCount" class="badge">0 resultados</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="loot-main">
+    <section class="panel panel-filters loot-filters">
+      <div class="filters">
+        <div class="filter-group">
+          <label>Modo</label>
+          <div class="seg-toggle" role="tablist">
+            <button class="seg-btn is-active" data-mode="itens" type="button">Por item</button>
+            <button class="seg-btn" data-mode="pokemons" type="button">Por pokemon</button>
+          </div>
+        </div>
+        <div class="filter-group filter-search">
+          <label for="searchItem">Buscar item</label>
+          <input id="searchItem" type="search" placeholder="Nome do item (ex.: Fire Tail)" />
+        </div>
+        <div class="filter-group filter-search">
+          <label for="searchPokemon">Buscar pokemon</label>
+          <input id="searchPokemon" type="search" placeholder="Nome do pokemon (ex.: Charmander)" />
+        </div>
+        <div class="filter-group">
+          <label for="filterFonte">Fonte</label>
+          <select id="filterFonte">
+            <option value="">Todas</option>
+            <option value="loot">Loot normal</option>
+            <option value="nightmare">Nightmare</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filterRegiao">Região</label>
+          <select id="filterRegiao">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="filter-group filter-selection">
+          <label>Seleção</label>
+          <div class="selection-actions">
+            <button id="btnToggleSelected" type="button" class="btn btn-ghost"
+              title="Mostrar só os pokemons que dropam todos os itens selecionados">
+              <span class="star-ico">★</span>
+              <span>Ver selecionados (<span id="selectedCount">0</span>)</span>
+            </button>
+            <button id="btnClearSelected" type="button" class="btn btn-ghost"
+              title="Limpar seleção">Limpar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="selectionSummary" class="panel selection-summary hidden">
+      <p>Pokemons que dropam <strong>todos</strong> esses itens:</p>
+      <div id="selectionChips" class="selection-chips"></div>
+    </section>
+
+    <section class="panel panel-crafts">
+      <div id="lootGrid" class="loot-grid">
+        <p class="loading">Carregando loot...</p>
+      </div>
+      <p id="lootEmpty" class="empty hidden">Nenhum resultado.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Dados extraídos da
+      <a href="https://wiki.pokexgames.com/index.php/Itens_de_Loot" target="_blank" rel="noopener noreferrer">Wiki oficial PokeXGames</a>
+      via scraper local. Projeto não oficial.
+    </p>
+  </footer>
+
+  <script src="loot-data.js"></script>
+  <script src="loot.js"></script>
+</body>
+</html>
