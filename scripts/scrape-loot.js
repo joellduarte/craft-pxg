@@ -94,6 +94,62 @@ function extractMain(html) {
 //   <h2><span class="mw-headline" id="Itens_Comuns">Itens Comuns</span></h2>
 //   <table class="wikitable...">
 //     <td><a href="/index.php/X"><img src="/images/..."/></a><br/><a href="/index.php/X">Nome</a></td>
+//
+// A wiki tem 3 variações de cell no índice de Itens_de_Loot:
+//   (rich)   <a href="/index.php/X"><img/></a> <br/> <a href="/index.php/X">Nome</a>
+//   (simple) <img/> <br/> <a href="/index.php/X">Nome</a>
+//   (img-only) <img/> <br/>                            -- caso raro: nome vem do alt/src
+function extractCell(cell) {
+  const richRe = /<a\s+href="\/index\.php\/([^"#?]+)"[^>]*>\s*<img[^>]+src="([^"]+)"[^>]*\/?>\s*<\/a>/i;
+  const imgRe = /<img[^>]+(?:alt="([^"]*)"[^>]*)?src="(\/images\/[^"]+)"[^>]*\/?>/i;
+  const textLinkRe = /<a\s+href="\/index\.php\/([^"#?]+)"[^>]*>([^<]+)<\/a>/g;
+
+  let slugFromUrl = null;
+  let iconUrl = null;
+  let nome = null;
+
+  // 1) tenta estrutura rica primeiro
+  const rich = richRe.exec(cell);
+  if (rich) {
+    slugFromUrl = decodeURIComponent(rich[1]);
+    iconUrl = absImg(rich[2]);
+  } else {
+    // 2) tenta estrutura simples: img solto + a-texto
+    const img = imgRe.exec(cell);
+    if (img) iconUrl = absImg(img[2]);
+    textLinkRe.lastIndex = 0;
+    const tl = textLinkRe.exec(cell);
+    if (tl) {
+      slugFromUrl = decodeURIComponent(tl[1]);
+      nome = stripTags(tl[2]) || null;
+    }
+    // 3) fallback img-only: nome vem do alt= ou do filename
+    if (!slugFromUrl && img) {
+      const altOrFile = img[1] || img[2].split("/").pop().replace(/\.[^.]+$/, "");
+      const clean = decode(altOrFile).replace(/\.[^.]+$/, "").trim();
+      if (clean) {
+        slugFromUrl = clean.replace(/\s+/g, "_");
+        nome = clean;
+      }
+    }
+  }
+
+  if (!slugFromUrl) return null;
+
+  // pega o nome visível do link de texto (caso ainda não preenchido)
+  if (!nome) {
+    textLinkRe.lastIndex = 0;
+    let tlm;
+    while ((tlm = textLinkRe.exec(cell))) {
+      const t = stripTags(tlm[2]);
+      if (t) { nome = t; break; }
+    }
+  }
+  if (!nome) nome = slugFromUrl.replace(/_/g, " ");
+
+  return { slugFromUrl, iconUrl, nome };
+}
+
 function parseIndex(html, fonte) {
   const main = extractMain(html);
   const items = [];
@@ -115,32 +171,16 @@ function parseIndex(html, fonte) {
         secao = text || secao;
       }
     } else if (m[3]) {
-      // td cell — tenta extrair item
-      const cell = m[3];
-      // primeiro <a href="/index.php/..."> que tem <img dentro
-      const linkRe = /<a\s+href="\/index\.php\/([^"#?]+)"[^>]*>\s*<img[^>]+src="([^"]+)"[^>]*\/?>\s*<\/a>/i;
-      const link = linkRe.exec(cell);
-      if (!link) continue;
-
-      const slugFromUrl = decodeURIComponent(link[1]);
-      const iconUrl = absImg(link[2]);
-
-      // pega o texto visível do link de texto (após o <br/>)
-      const textLinkRe = /<a\s+href="\/index\.php\/[^"#?]+"[^>]*>([^<]+)<\/a>/g;
-      let nome = null;
-      let tlm;
-      while ((tlm = textLinkRe.exec(cell))) {
-        const t = stripTags(tlm[1]);
-        if (t) { nome = t; break; }
-      }
-      if (!nome) nome = slugFromUrl.replace(/_/g, " ");
+      // td cell — tenta extrair item via 3 estratégias
+      const extracted = extractCell(m[3]);
+      if (!extracted) continue;
 
       items.push({
-        id: slug(slugFromUrl),
-        nome: nome,
-        slug: slugFromUrl,
-        url: `${WIKI_BASE}/index.php/${slugFromUrl}`,
-        imagem: iconUrl,
+        id: slug(extracted.slugFromUrl),
+        nome: extracted.nome,
+        slug: extracted.slugFromUrl,
+        url: `${WIKI_BASE}/index.php/${extracted.slugFromUrl}`,
+        imagem: extracted.iconUrl,
         regiao,
         secao,
         fonte
