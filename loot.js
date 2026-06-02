@@ -24,6 +24,25 @@
     collapsedClusters: new Set() // assinaturas de cluster recolhidas (união)
   };
 
+  // Lê ?selected=id1,id2 da URL e sobrescreve seleção (vindo do craft.html).
+  // Roda antes de loadState pra ser o estado inicial; se houver query, ignora
+  // a seleção anterior persistida.
+  function applyQueryString() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("selected");
+      if (!raw) return false;
+      const ids = raw.split(",").map((s) => s.trim()).filter(Boolean);
+      if (ids.length === 0) return false;
+      state.selected = new Set(ids);
+      state.showOnlySelected = true;
+      return true;
+    } catch (err) {
+      console.warn("[loot] falha ao ler querystring:", err);
+      return false;
+    }
+  }
+
   // ---------------- Persistência ----------------
   function loadState() {
     try {
@@ -770,6 +789,9 @@
     }
 
     loadState();
+    // querystring tem prioridade sobre o estado persistido (chegou de outro lugar
+    // querendo ver itens específicos)
+    if (applyQueryString()) saveState();
     buildIndexes();
     populateRegioes();
     bindEvents();

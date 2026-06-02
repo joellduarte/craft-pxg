@@ -364,6 +364,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -376,6 +377,9 @@ input[type="number"] {
 }
 .resource-item.is-hidden {
   display: none;
+}
+.resource-item.is-sem-droppers {
+  opacity: 0.78;
 }
 .resource-item img {
   width: 28px;
@@ -407,9 +411,75 @@ input[type="number"] {
   font-family: var(--font-mono);
   text-align: right;
 }
-.resource-item input:focus {
+.resource-item input[type="number"]:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+/* Placeholder de preço quando "sem drop" está marcado */
+.res-no-price {
+  display: none;
+  width: 100px;
+  flex-shrink: 0;
+  text-align: right;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 4px 6px;
+}
+.resource-item.is-sem-droppers > input[type="number"] {
+  display: none;
+}
+.resource-item.is-sem-droppers .res-no-price {
+  display: inline-block;
+}
+
+/* Check "sem drop" — pequeno e discreto */
+.res-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.7rem;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.res-check input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.res-check:hover {
+  color: var(--text-1);
+}
+
+/* Badges informativos (linha completa abaixo do recurso) */
+.res-badge {
+  flex-basis: 100%;
+  margin-left: 36px;  /* alinha sob o nome */
+  font-size: 0.72rem;
+  color: var(--text-2);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.res-badge-raw {
+  color: #8db97a;
+}
+.res-badge-subcraft {
+  color: var(--accent-2);
+}
+.res-badge-loot {
+  color: var(--accent);
+  cursor: pointer;
+}
+.res-badge-loot:hover {
+  text-decoration: underline;
+}
+.res-badge-unknown {
+  color: #c08b5c;
+  font-style: italic;
 }
 
 /* ============================================================
@@ -734,6 +804,26 @@ input[type="number"] {
   font-style: italic;
   color: var(--text-2);
   opacity: 0.75;
+}
+
+/* Botão "ver droppers da receita" — abre loot.html em nova aba */
+.recipe-droppers-btn {
+  display: block;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.78rem;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.12s, border-color 0.12s;
+}
+.recipe-droppers-btn:hover {
+  background: var(--bg-3);
+  border-color: var(--accent);
+  text-decoration: none;
 }
 
 /* Sale inputs */

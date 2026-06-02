@@ -46,6 +46,7 @@
   const craftsById = {};        // id -> craft
   const resourceIndex = {};     // resourceName -> Set<craftId>
   const craftIdByName = new Map(); // nome normalizado -> craftId (resolve sub-receitas)
+  const lootByName = new Map(); // nome normalizado -> { id, nome, droppadoPor }
 
   function normalizeName(s) {
     return String(s)
@@ -77,6 +78,7 @@
         selected: Array.isArray(parsed.selected) ? parsed.selected : [],
         showOnlySelected: !!parsed.showOnlySelected,
         subQty: parsed.subQty && typeof parsed.subQty === "object" ? parsed.subQty : {},
+        semDroppers: parsed.semDroppers && typeof parsed.semDroppers === "object" ? parsed.semDroppers : {},
       };
     } catch (e) {
       console.warn("Erro lendo localStorage, usando estado padrão.", e);
@@ -95,6 +97,7 @@
       selected: [],
       showOnlySelected: false,
       subQty: {},
+      semDroppers: {},
     };
   }
 
@@ -381,7 +384,7 @@
     let cost = 0;
     const resourceCosts = {};
     for (const r of craft.recursos) {
-      const unitPrice = state.resources[r.nome] || 0;
+      const unitPrice = state.semDroppers[r.nome] ? 0 : (state.resources[r.nome] || 0);
       const subtotal = unitPrice * r.quantidade * qty;
       resourceCosts[r.nome] = { unitPrice, subtotal };
       cost += subtotal;
@@ -443,37 +446,154 @@
 
     const frag = document.createDocumentFragment();
     for (const r of resources) {
-      const item = document.createElement("div");
-      item.className = "resource-item";
-      item.dataset.name = r.nome.toLowerCase();
-
-      const img = makeImg(r.imagem, r.nome);
-
-      const name = document.createElement("span");
-      name.className = "res-name";
-      name.textContent = r.nome;
-      name.title = r.nome;
-
-      const input = document.createElement("input");
-      input.type = "number";
-      input.min = "0";
-      input.step = "1";
-      input.placeholder = "0";
-      input.value = state.resources[r.nome] ?? "";
-      input.addEventListener("input", () => {
-        const v = parseNumberInput(input.value);
-        if (v > 0) state.resources[r.nome] = v;
-        else delete state.resources[r.nome];
-        saveState();
-        recalcByResource(r.nome);
-      });
-
-      item.appendChild(img);
-      item.appendChild(name);
-      item.appendChild(input);
-      frag.appendChild(item);
+      frag.appendChild(buildResourceRow(r));
     }
     root.appendChild(frag);
+  }
+
+  function buildResourceRow(r) {
+    const item = document.createElement("div");
+    item.className = "resource-item";
+    item.dataset.name = r.nome.toLowerCase();
+    if (state.semDroppers[r.nome]) item.classList.add("is-sem-droppers");
+
+    const img = makeImg(r.imagem, r.nome);
+
+    const name = document.createElement("span");
+    name.className = "res-name";
+    name.textContent = r.nome;
+    name.title = r.nome;
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "0";
+    input.step = "1";
+    input.placeholder = "0";
+    input.value = state.resources[r.nome] ?? "";
+    input.addEventListener("input", () => {
+      const v = parseNumberInput(input.value);
+      if (v > 0) state.resources[r.nome] = v;
+      else delete state.resources[r.nome];
+      saveState();
+      recalcByResource(r.nome);
+    });
+
+    const noPrice = document.createElement("span");
+    noPrice.className = "res-no-price";
+    noPrice.textContent = "—";
+    noPrice.title = "Sem preço (marcado como sem droppers)";
+
+    const checkLabel = document.createElement("label");
+    checkLabel.className = "res-check";
+    checkLabel.title = "Marcar como item sem droppers (matéria-prima, profissão, especial)";
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = !!state.semDroppers[r.nome];
+    const checkText = document.createElement("span");
+    checkText.textContent = "sem drop";
+    checkLabel.appendChild(check);
+    checkLabel.appendChild(checkText);
+    check.addEventListener("change", () => {
+      if (check.checked) state.semDroppers[r.nome] = true;
+      else delete state.semDroppers[r.nome];
+      saveState();
+      // re-render esta linha pra atualizar badge + visibilidade do input
+      const newRow = buildResourceRow(r);
+      item.replaceWith(newRow);
+      recalcByResource(r.nome);
+    });
+
+    item.appendChild(img);
+    item.appendChild(name);
+    item.appendChild(input);
+    item.appendChild(noPrice);
+    item.appendChild(checkLabel);
+
+    for (const badge of buildResourceBadges(r)) {
+      item.appendChild(badge);
+    }
+
+    return item;
+  }
+
+  // Deriva os badges informativos do recurso a partir de:
+  //   - flag manual semDroppers (mutuamente exclusiva — esconde os outros)
+  //   - match em sub-receita (craftIdByName)  → coexiste com loot
+  //   - match em loot-data (lootByName)        → coexiste com sub-receita
+  //   - fallback: ⚠ Sem info
+  function buildResourceBadges(r) {
+    const isSemDroppers = !!state.semDroppers[r.nome];
+    const nameKey = normalizeName(r.nome);
+    const subCraftId = craftIdByName.get(nameKey);
+    const lootItem = lootByName.get(nameKey);
+
+    if (isSemDroppers) {
+      const b = document.createElement("span");
+      b.className = "res-badge res-badge-raw";
+      b.textContent = "🌿 Matéria-prima";
+      return [b];
+    }
+
+    const badges = [];
+    if (subCraftId && subCraftId !== r.id) {
+      const b = document.createElement("span");
+      b.className = "res-badge res-badge-subcraft";
+      b.textContent = "↳ Receita do Professor";
+      b.title = "Esse recurso também é uma receita do Professor — o custo dele pode ser calculado a partir dos ingredientes dele";
+      badges.push(b);
+    }
+    if (lootItem) {
+      const a = document.createElement("a");
+      a.className = "res-badge res-badge-loot";
+      a.href = `loot.html?selected=${encodeURIComponent(lootItem.id)}`;
+      a.target = "_blank";
+      a.rel = "noopener";
+      const dropCount = (lootItem.droppadoPor || []).length;
+      a.textContent = dropCount > 0
+        ? `👁 ver droppers (${dropCount})`
+        : "👁 ver no loot";
+      a.title = dropCount > 0
+        ? `Esse item dropa de ${dropCount} pokemon(s) — clique pra ver no Loot Tracker`
+        : "Item existe no Loot Tracker mas sem droppers específicos";
+      a.addEventListener("click", (e) => e.stopPropagation());
+      badges.push(a);
+    }
+
+    if (badges.length > 0) return badges;
+
+    // Sem flag, sem sub-craft, sem loot → convite a marcar
+    const b = document.createElement("span");
+    b.className = "res-badge res-badge-unknown";
+    b.textContent = "⚠ Sem info";
+    b.title = "Sem droppers conhecidos e sem receita. Talvez seja matéria-prima/profissão — considere marcar 'sem drop'.";
+    return [b];
+  }
+
+  // Junta os ingredientes "linkáveis" (têm match em loot-data e não estão marcados
+  // como sem drop) e devolve um botão que abre o loot tracker pré-filtrado.
+  // Retorna null se nenhum ingrediente é linkável.
+  function buildRecipeDroppersButton(craft) {
+    const ids = [];
+    const seen = new Set();
+    for (const r of craft.recursos) {
+      if (state.semDroppers[r.nome]) continue;
+      const lootItem = lootByName.get(normalizeName(r.nome));
+      if (!lootItem) continue;
+      if (seen.has(lootItem.id)) continue;
+      seen.add(lootItem.id);
+      ids.push(lootItem.id);
+    }
+    if (ids.length === 0) return null;
+
+    const btn = document.createElement("a");
+    btn.className = "recipe-droppers-btn";
+    btn.href = `loot.html?selected=${ids.map(encodeURIComponent).join(",")}`;
+    btn.target = "_blank";
+    btn.rel = "noopener";
+    btn.textContent = `👁 Ver droppers da receita (${ids.length})`;
+    btn.title = "Abre o Loot Tracker em nova aba com os recursos desta receita pré-selecionados";
+    btn.addEventListener("click", (e) => e.stopPropagation());
+    return btn;
   }
 
   // ---------- Renderização: Cards de Craft ----------
@@ -610,6 +730,10 @@
       }
     }
     card.appendChild(resourcesBox);
+
+    // Botão "ver droppers da receita" — abre loot.html já filtrado
+    const droppersBtn = buildRecipeDroppersButton(craft);
+    if (droppersBtn) card.appendChild(droppersBtn);
 
     // Override de quantidade quando craft é sub-receita (escondido por padrão)
     const subBox = document.createElement("div");
@@ -1032,6 +1156,13 @@
       craftIdByName.set(normalizeName(c.nome), c.id);
     }
     Object.assign(resourceIndex, buildResourceIndex(CRAFTS));
+
+    // Índice de loot (opcional — loot-data.js pode não estar carregado)
+    if (typeof LOOT_ITEMS !== "undefined" && Array.isArray(LOOT_ITEMS)) {
+      for (const it of LOOT_ITEMS) {
+        lootByName.set(normalizeName(it.nome), it);
+      }
+    }
 
     // Remove IDs que não existem mais (caso data.js tenha mudado)
     state.selected = state.selected.filter((id) => craftsById[id]);
