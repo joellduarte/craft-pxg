@@ -68,8 +68,20 @@
     </section>
 
     <section id="selectionSummary" class="panel selection-summary hidden">
-      <p>Pokemons que dropam <strong>todos</strong> esses itens:</p>
       <div id="selectionChips" class="selection-chips"></div>
+      <div class="selection-mode">
+        <span class="selection-mode-label">Mostrar pokemons que dropam:</span>
+        <div class="seg-toggle" role="tablist">
+          <button class="seg-btn is-active" data-selmode="uniao" type="button"
+            title="Pokemons que dropam pelo menos 1 dos itens selecionados (campeões no topo)">
+            ∪ Qualquer um
+          </button>
+          <button class="seg-btn" data-selmode="intersecao" type="button"
+            title="Pokemons que dropam TODOS os itens selecionados">
+            ⊆ Todos em comum
+          </button>
+        </div>
+      </div>
     </section>
 
     <section class="panel panel-crafts">

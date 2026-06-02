@@ -19,7 +19,9 @@
     fonte: "",
     regiao: "",
     selected: new Set(),       // ids de itens marcados
-    showOnlySelected: false    // se true, exibe interseção de droppers
+    showOnlySelected: false,   // se true, exibe seleção (união ou interseção)
+    selectionMode: "uniao",    // "uniao" | "intersecao"
+    collapsedClusters: new Set() // assinaturas de cluster recolhidas (união)
   };
 
   // ---------------- Persistência ----------------
@@ -34,6 +36,12 @@
       if (parsed && typeof parsed.showOnlySelected === "boolean") {
         state.showOnlySelected = parsed.showOnlySelected;
       }
+      if (parsed && (parsed.selectionMode === "uniao" || parsed.selectionMode === "intersecao")) {
+        state.selectionMode = parsed.selectionMode;
+      }
+      if (parsed && Array.isArray(parsed.collapsedClusters)) {
+        state.collapsedClusters = new Set(parsed.collapsedClusters);
+      }
     } catch (err) {
       console.warn("[loot] falha ao carregar localStorage:", err);
     }
@@ -45,7 +53,9 @@
         LS_KEY,
         JSON.stringify({
           selected: Array.from(state.selected),
-          showOnlySelected: state.showOnlySelected
+          showOnlySelected: state.showOnlySelected,
+          selectionMode: state.selectionMode,
+          collapsedClusters: Array.from(state.collapsedClusters)
         })
       );
     } catch (err) {
@@ -344,9 +354,11 @@
   function render() {
     const grid = els.grid;
     grid.innerHTML = "";
+    grid.className = "loot-grid";
 
     if (state.showOnlySelected) {
-      renderIntersection();
+      if (state.selectionMode === "intersecao") renderIntersection();
+      else renderUnion();
       return;
     }
 
@@ -365,13 +377,7 @@
     els.empty.classList.toggle("hidden", items.length > 0);
   }
 
-  function renderIntersection() {
-    const grid = els.grid;
-    const selectedItems = LOOT_ITEMS.filter((it) => state.selected.has(it.id));
-    const withDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length > 0);
-    const withoutDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length === 0);
-
-    // chips dos itens selecionados
+  function renderSelectionHeader(selectedItems, withoutDroppers) {
     els.selectionChips.innerHTML = "";
     for (const it of selectedItems) {
       const chip = document.createElement("span");
@@ -400,10 +406,19 @@
     if (withoutDroppers.length > 0) {
       const warn = document.createElement("p");
       warn.className = "selection-warn";
-      warn.textContent = `${withoutDroppers.length} item(s) sem lista de droppers (drop genérico por elemento) — ignorados na interseção.`;
+      warn.textContent = `${withoutDroppers.length} item(s) sem lista específica de droppers (drop genérico por elemento) — ignorados.`;
       els.selectionChips.appendChild(warn);
     }
     els.selectionSummary.classList.remove("hidden");
+  }
+
+  function renderIntersection() {
+    const grid = els.grid;
+    const selectedItems = LOOT_ITEMS.filter((it) => state.selected.has(it.id));
+    const withDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length > 0);
+    const withoutDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length === 0);
+
+    renderSelectionHeader(selectedItems, withoutDroppers);
 
     if (selectedItems.length === 0) {
       els.count.textContent = "0 pokemons";
@@ -430,13 +445,11 @@
     const firstNames = Array.from(sets[0]);
     const common = firstNames.filter((nome) => sets.every((s) => s.has(nome)));
 
-    // monta cards a partir do pokemonsIndex
     const cards = common
       .map((nome) => pokemonsIndex.get(normalize(nome)))
       .filter(Boolean);
     cards.sort((a, b) => a.nome.localeCompare(b.nome));
 
-    // restringe os itens exibidos no card só aos selecionados
     const selectedSet = new Set(withDroppers.map((it) => it.id));
     for (const pk of cards) {
       pk._filteredItens = pk.itens.filter((it) => selectedSet.has(it.id));
@@ -451,6 +464,199 @@
       grid.appendChild(p);
     }
     els.empty.classList.add("hidden");
+  }
+
+  function renderUnion() {
+    const grid = els.grid;
+    const selectedItems = LOOT_ITEMS.filter((it) => state.selected.has(it.id));
+    const withDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length > 0);
+    const withoutDroppers = selectedItems.filter((it) => (it.droppadoPor || []).length === 0);
+
+    renderSelectionHeader(selectedItems, withoutDroppers);
+
+    if (selectedItems.length === 0) {
+      els.count.textContent = "0 pokemons";
+      const p = document.createElement("p");
+      p.className = "loot-empty-msg";
+      p.textContent = "Nenhum item selecionado. Marque itens (★) e volte aqui.";
+      grid.appendChild(p);
+      els.empty.classList.add("hidden");
+      return;
+    }
+
+    if (withDroppers.length === 0) {
+      els.count.textContent = "0 pokemons";
+      const p = document.createElement("p");
+      p.className = "loot-empty-msg";
+      p.textContent = "Nenhum dos itens selecionados tem lista específica de droppers.";
+      grid.appendChild(p);
+      els.empty.classList.add("hidden");
+      return;
+    }
+
+    // união: agrega cada pokemon → quais itens selecionados ele dropa
+    const total = withDroppers.length;
+    const agg = new Map(); // pokeKey → { pk, itens: [item, ...] }
+    for (const item of withDroppers) {
+      for (const dr of item.droppadoPor) {
+        const key = normalize(dr.nome);
+        if (!key) continue;
+        let entry = agg.get(key);
+        if (!entry) {
+          const pk = pokemonsIndex.get(key);
+          if (!pk) continue;
+          entry = { pk, itens: [] };
+          agg.set(key, entry);
+        }
+        entry.itens.push(item);
+      }
+    }
+
+    // Caso 1 item selecionado: render flat (section header seria redundante)
+    if (total === 1) {
+      const rows = Array.from(agg.values());
+      rows.sort((a, b) => a.pk.nome.localeCompare(b.pk.nome));
+      for (const row of rows) {
+        row.pk._filteredItens = row.itens;
+        grid.appendChild(renderPokemonCardCoverage(row.pk, row.itens.length, total));
+      }
+      els.count.textContent = `${rows.length} pokemon${rows.length === 1 ? "" : "s"}`;
+      els.empty.classList.add("hidden");
+      return;
+    }
+
+    // Caso geral: agrupa por assinatura (subconjunto exato de itens que cada poke dropa)
+    const clusters = new Map(); // signature → { signature, items, pokes }
+    for (const entry of agg.values()) {
+      const ids = entry.itens.map((i) => i.id).sort();
+      const signature = ids.join("|");
+      let cluster = clusters.get(signature);
+      if (!cluster) {
+        cluster = {
+          signature,
+          items: entry.itens.slice().sort((a, b) => a.nome.localeCompare(b.nome)),
+          pokes: []
+        };
+        clusters.set(signature, cluster);
+      }
+      cluster.pokes.push(entry.pk);
+    }
+    const sortedClusters = Array.from(clusters.values()).sort((a, b) => {
+      if (b.items.length !== a.items.length) return b.items.length - a.items.length;
+      return b.pokes.length - a.pokes.length;
+    });
+
+    const totalPokes = agg.size;
+    let allCount = 0, highCount = 0;
+    for (const c of sortedClusters) {
+      if (c.items.length === total) allCount += c.pokes.length;
+      else if (c.items.length / total >= 0.5) highCount += c.pokes.length;
+    }
+
+    grid.className = "loot-clusters";
+
+    for (const cluster of sortedClusters) {
+      const tier = cluster.items.length === total ? "all"
+        : cluster.items.length / total >= 0.5 ? "high" : "low";
+
+      const section = document.createElement("section");
+      section.className = `loot-cluster loot-cluster-tier-${tier}`;
+      if (state.collapsedClusters.has(cluster.signature)) {
+        section.classList.add("is-collapsed");
+      }
+
+      const header = document.createElement("div");
+      header.className = "loot-cluster-header";
+      header.setAttribute("role", "button");
+      header.setAttribute("tabindex", "0");
+      header.title = "Clique para esconder/mostrar essa seção";
+
+      const chevron = document.createElement("span");
+      chevron.className = "loot-cluster-chevron";
+      chevron.setAttribute("aria-hidden", "true");
+      chevron.textContent = "▾";
+      header.appendChild(chevron);
+
+      const toggleCollapsed = () => {
+        if (state.collapsedClusters.has(cluster.signature)) {
+          state.collapsedClusters.delete(cluster.signature);
+        } else {
+          state.collapsedClusters.add(cluster.signature);
+        }
+        section.classList.toggle("is-collapsed");
+        saveState();
+      };
+      header.addEventListener("click", toggleCollapsed);
+      header.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleCollapsed();
+        }
+      });
+
+      const icons = document.createElement("div");
+      icons.className = "loot-cluster-icons";
+      for (const it of cluster.items) {
+        const img = document.createElement("img");
+        img.src = it.imagem || "";
+        img.alt = it.nome;
+        img.title = it.nome;
+        img.loading = "lazy";
+        img.onerror = () => { img.style.display = "none"; };
+        icons.appendChild(img);
+      }
+      header.appendChild(icons);
+
+      const label = document.createElement("div");
+      label.className = "loot-cluster-label";
+      label.textContent = cluster.items.map((i) => i.nome).join(" + ");
+      header.appendChild(label);
+
+      const meta = document.createElement("div");
+      meta.className = "loot-cluster-meta";
+      const strong = document.createElement("strong");
+      strong.textContent = `${cluster.items.length}/${total}`;
+      meta.appendChild(strong);
+      meta.appendChild(document.createTextNode(
+        ` itens · ${cluster.pokes.length} pokemon${cluster.pokes.length === 1 ? "" : "s"}`
+      ));
+      header.appendChild(meta);
+
+      section.appendChild(header);
+
+      const innerGrid = document.createElement("div");
+      innerGrid.className = "loot-grid";
+      cluster.pokes.sort((a, b) => a.nome.localeCompare(b.nome));
+      for (const pk of cluster.pokes) {
+        pk._filteredItens = cluster.items;
+        innerGrid.appendChild(renderPokemonCard(pk));
+      }
+      section.appendChild(innerGrid);
+
+      grid.appendChild(section);
+    }
+
+    const parts = [`${totalPokes} pokemon${totalPokes === 1 ? "" : "s"}`];
+    if (allCount > 0) parts.push(`${allCount} dropa${allCount === 1 ? "" : "m"} todos`);
+    if (highCount > 0) parts.push(`${highCount} ≥50%`);
+    els.count.textContent = parts.join(" · ");
+    els.empty.classList.add("hidden");
+  }
+
+  function renderPokemonCardCoverage(pk, covered, total) {
+    const card = renderPokemonCard(pk);
+    const tier = covered === total ? "all" : covered / total >= 0.5 ? "high" : "low";
+    card.classList.add(`loot-card-tier-${tier}`);
+
+    const badge = document.createElement("span");
+    badge.className = `loot-coverage-badge loot-coverage-${tier}`;
+    badge.textContent = covered === total
+      ? `★ ${covered}/${total}`
+      : `${covered}/${total}`;
+    badge.title = `Dropa ${covered} de ${total} itens selecionados`;
+    card.appendChild(badge);
+
+    return card;
   }
 
   function toggleSelected(id) {
@@ -480,6 +686,9 @@
   function updateSelectionUI() {
     els.selectedCount.textContent = state.selected.size;
     els.btnToggleSelected.classList.toggle("is-active", state.showOnlySelected);
+    for (const b of document.querySelectorAll(".seg-btn[data-selmode]")) {
+      b.classList.toggle("is-active", b.dataset.selmode === state.selectionMode);
+    }
   }
 
   // ---------------- Setup ----------------
@@ -498,10 +707,10 @@
   }
 
   function bindEvents() {
-    for (const btn of document.querySelectorAll(".seg-btn")) {
+    for (const btn of document.querySelectorAll(".seg-btn[data-mode]")) {
       btn.addEventListener("click", () => {
         state.mode = btn.dataset.mode;
-        for (const b of document.querySelectorAll(".seg-btn")) {
+        for (const b of document.querySelectorAll(".seg-btn[data-mode]")) {
           b.classList.toggle("is-active", b === btn);
         }
         if (state.showOnlySelected) {
@@ -509,6 +718,16 @@
           updateSelectionUI();
         }
         render();
+      });
+    }
+    for (const btn of document.querySelectorAll(".seg-btn[data-selmode]")) {
+      btn.addEventListener("click", () => {
+        state.selectionMode = btn.dataset.selmode;
+        for (const b of document.querySelectorAll(".seg-btn[data-selmode]")) {
+          b.classList.toggle("is-active", b === btn);
+        }
+        saveState();
+        if (state.showOnlySelected) render();
       });
     }
     els.searchItem.addEventListener("input", () => {
