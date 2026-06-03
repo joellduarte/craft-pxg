@@ -800,12 +800,12 @@ const CRAFTS_ADVENTURER = [
         "imagem": "https://wiki.pokexgames.com/images/f/f4/Pawn.png"
       },
       {
-        "nome": "Bear Paw",
+        "nome": "Bear Pawn",
         "quantidade": 5,
         "imagem": "https://wiki.pokexgames.com/images/d/d9/Bear_Paw.png"
       },
       {
-        "nome": "Black Fins",
+        "nome": "Black Fin",
         "quantidade": 10,
         "imagem": "https://wiki.pokexgames.com/images/d/dc/Black_Fin.png"
       },
@@ -830,7 +830,7 @@ const CRAFTS_ADVENTURER = [
         "imagem": "https://wiki.pokexgames.com/images/e/e5/Dog_Ear.png"
       },
       {
-        "nome": "Strange Flower",
+        "nome": "Strange Flowers",
         "quantidade": 15,
         "imagem": "https://wiki.pokexgames.com/images/e/ec/Strange_Flower.png"
       },
@@ -840,7 +840,7 @@ const CRAFTS_ADVENTURER = [
         "imagem": "https://wiki.pokexgames.com/images/2/2b/Hyena_tail.png"
       },
       {
-        "nome": "Mini Wings",
+        "nome": "Mini Wing",
         "quantidade": 1,
         "imagem": "https://wiki.pokexgames.com/images/c/c4/Mini_Wings.png"
       }

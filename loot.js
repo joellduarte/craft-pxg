@@ -769,7 +769,7 @@
     els.btnClearSelected.addEventListener("click", clearSelected);
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     els.grid = document.getElementById("lootGrid");
     els.count = document.getElementById("resultCount");
     els.empty = document.getElementById("lootEmpty");
@@ -786,6 +786,12 @@
     if (typeof LOOT_ITEMS === "undefined") {
       els.grid.innerHTML = "<p class='loading'>Erro: loot-data.js não carregou.</p>";
       return;
+    }
+
+    // Aplica correções de nomes da wiki antes de qualquer indexação
+    if (typeof WikiOverrides !== "undefined") {
+      await WikiOverrides.load();
+      WikiOverrides.applyToLoot(LOOT_ITEMS);
     }
 
     loadState();

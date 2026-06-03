@@ -64,6 +64,24 @@
         <span class="tool-cta btn">Abrir →</span>
       </a>
     </section>
+
+    <section class="hub-backup" aria-label="Backup">
+      <div class="hub-backup-head">
+        <h3>Backup dos dados</h3>
+        <p class="hub-backup-sub">
+          Preços, vendas, seleções e configurações ficam salvos só neste navegador.
+          Exporte um arquivo pra reutilizar em outra máquina ou guardar como cópia.
+        </p>
+      </div>
+      <div class="hub-backup-actions">
+        <button id="btnExport" type="button" class="btn">📥 Exportar backup</button>
+        <label class="btn btn-file-import" for="fileImport">
+          <span>📤 Importar backup</span>
+          <input id="fileImport" type="file" accept="application/json,.json" hidden />
+        </label>
+        <span id="backupStatus" class="hub-backup-status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">
@@ -73,5 +91,49 @@
       Projeto não oficial.
     </p>
   </footer>
+
+  <script src="backup.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      const status = document.getElementById("backupStatus");
+      function setStatus(msg, isError) {
+        if (!status) return;
+        status.textContent = msg;
+        status.classList.toggle("is-error", !!isError);
+        if (msg) {
+          clearTimeout(setStatus._t);
+          setStatus._t = setTimeout(() => { status.textContent = ""; status.classList.remove("is-error"); }, 6000);
+        }
+      }
+      document.getElementById("btnExport").addEventListener("click", () => {
+        try {
+          const n = PxgBackup.exportBackup();
+          setStatus(`Backup gerado (${n} chave(s)).`);
+        } catch (e) {
+          console.error(e);
+          setStatus("Falha ao gerar backup: " + e.message, true);
+        }
+      });
+      document.getElementById("fileImport").addEventListener("change", async (ev) => {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        const mode = confirm(
+          "Importar backup:\n\n" +
+          "OK → MESCLAR (mantém valores locais e completa só o que está vazio).\n" +
+          "Cancelar → SUBSTITUIR (sobrescreve tudo com o backup)."
+        ) ? "merge" : "replace";
+        try {
+          const n = await PxgBackup.importFromFile(file, mode);
+          setStatus(`Backup importado (${mode}, ${n} chave(s)). Recarregue as páginas pra ver.`);
+        } catch (e) {
+          console.error(e);
+          setStatus("Falha ao importar: " + e.message, true);
+        } finally {
+          ev.target.value = "";
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

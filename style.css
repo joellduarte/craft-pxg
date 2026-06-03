@@ -1130,6 +1130,47 @@ input[type="number"] {
   pointer-events: none;
 }
 
+/* ---- Hub Backup ---- */
+.hub-backup {
+  margin-top: 28px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+}
+.hub-backup-head h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-0);
+}
+.hub-backup-sub {
+  margin: 0 0 14px;
+  color: var(--text-2);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.hub-backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.btn-file-import {
+  cursor: pointer;
+}
+.btn-file-import:hover {
+  filter: brightness(1.1);
+}
+.hub-backup-status {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.hub-backup-status.is-error {
+  color: #ef6b6b;
+}
+
 /* ============================================================
    Star Signs Tracker
    ============================================================ */

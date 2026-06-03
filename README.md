@@ -15,3 +15,7 @@ Você verifica o preço vendendo para NPC ou market, já te mostra todo o cálcu
 A parte de Star Sign é só marcar os pontos que você já adquiriu pra ficar registrado e não se perder no que precisa fazer pra ganhar mais pontos de constelação
 
 A parte de drops é só pra facilitar a visualização de "quem dropa o que", podendo pesquisar por item ou pokémon, mesclando os itens que você quer dropar e ver se tem pokémons que dropam ele em comum pra facilitar a hunt ao invés de ir em mais lugares dropar.
+
+Para usar em outro navegador/máquina você pode exportar/importar as informações na página inicial do Hub pra não perder os registros de preços principalmente, já que guardamos tudo em cache e não banco de dados.
+
+Para atualizar os nomes dos recursos que estão errados basta adicionar o nome correto no arquivo "wiki-overrides.json"

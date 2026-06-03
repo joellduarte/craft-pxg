@@ -1,0 +1,10 @@
+{
+  "_doc": "Mapa de correcoes de nomes da Wiki PXG. Aplicado em runtime em TODAS as paginas. Pra corrigir um nome: adicione uma linha em resourceNames (recursos/itens de loot) ou craftNames (nome de receita). Depois e so commit + push — proximo refresh ja aplica em qualquer maquina.",
+  "resourceNames": {
+    "Bear Pawn": "Bear Paw",
+    "Black Fin": "Black Fins",
+    "Strange Flowers": "Strange Flower",
+    "Mini Wing": "Mini Wings"
+  },
+  "craftNames": {}
+}

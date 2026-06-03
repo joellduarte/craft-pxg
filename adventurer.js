@@ -918,10 +918,20 @@
   }
 
   // ---------- Inicialização ----------
-  function init() {
+  async function init() {
     if (typeof CRAFTS_ADVENTURER === "undefined" || !Array.isArray(CRAFTS_ADVENTURER)) {
       console.error("CRAFTS_ADVENTURER não está disponível. Verifique adventurer-data.js.");
       return;
+    }
+
+    // Aplica correções de nomes da wiki antes de qualquer indexação
+    if (typeof WikiOverrides !== "undefined") {
+      await WikiOverrides.load();
+      WikiOverrides.applyToCrafts(CRAFTS_ADVENTURER);
+      if (typeof LOOT_ITEMS !== "undefined" && Array.isArray(LOOT_ITEMS)) {
+        WikiOverrides.applyToLoot(LOOT_ITEMS);
+      }
+      WikiOverrides.migrateSharedState();
     }
 
     for (const c of CRAFTS_ADVENTURER) {

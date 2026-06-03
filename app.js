@@ -1176,10 +1176,21 @@
   }
 
   // ---------- Inicialização ----------
-  function init() {
+  async function init() {
     if (typeof CRAFTS === "undefined" || !Array.isArray(CRAFTS)) {
       console.error("CRAFTS não está disponível. Verifique data.js.");
       return;
+    }
+
+    // Aplica correções de nomes da wiki antes de qualquer indexação.
+    // Migra também chaves no PxgShared que tenham sido digitadas sob nome errado.
+    if (typeof WikiOverrides !== "undefined") {
+      await WikiOverrides.load();
+      WikiOverrides.applyToCrafts(CRAFTS);
+      if (typeof LOOT_ITEMS !== "undefined" && Array.isArray(LOOT_ITEMS)) {
+        WikiOverrides.applyToLoot(LOOT_ITEMS);
+      }
+      WikiOverrides.migrateSharedState();
     }
 
     // Índices
