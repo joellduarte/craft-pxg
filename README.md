@@ -1,6 +1,7 @@
 # Craft PXG 💸
 
 Projetinho que criei apenas pra me ajudar nos cálculos vs lucros de profissão (focado em Professor por enquanto) no jogo PokeXGames.
+Agora (03/06/2026) adicionei receitas de aventureiro pq eu gosto de dropar itens de finder A pra vender kkkkkkk
 
 Como o mercado do jogo muda toda hora, fiz de um jeito que eu possa cadastrar os preços na própria tela e ele já calcula tudo, guardando os valores etc e vou vendo o que está compensando mais no momento e atualizando o preço dos recursos se necessário..
 
