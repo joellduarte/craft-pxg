@@ -1,6 +1,7 @@
 // PXG Professor Craft Calculator - Dados extraídos da Wiki oficial
 // Fonte: https://wiki.pokexgames.com/index.php/Craft_Profiss%C3%B5es_-_Professor
 // isBerrie=true => aplica regra de multiplicador 2 (média) e 2.5 (sorte)
+// unidadesPorReceita=N => receita produz N unidades por execução (default 1 quando omitido)
 
 const CRAFTS = [
   // ===== RANK E =====
@@ -8,7 +9,7 @@ const CRAFTS = [
     id: "small-potion",
     nome: "Small Potion",
     imagem: "https://wiki.pokexgames.com/images/3/3c/Small_Potion.png",
-    tipo: "poção", rank: "E", skill: 0, isBerrie: false,
+    tipo: "poção", rank: "E", skill: 0, isBerrie: false, unidadesPorReceita: 10,
     recursos: [
       { nome: "Bug Gosme", quantidade: 15, imagem: "https://wiki.pokexgames.com/images/e/e8/Bug_Gosme.png" },
       { nome: "Water Gem", quantidade: 15, imagem: "https://wiki.pokexgames.com/images/7/75/Watergem.png" },
@@ -38,7 +39,7 @@ const CRAFTS = [
     id: "leaves",
     nome: "Leaves",
     imagem: "https://wiki.pokexgames.com/images/f/f1/Leaves.png",
-    tipo: "material", rank: "E", skill: 12, isBerrie: false,
+    tipo: "material", rank: "E", skill: 12, isBerrie: false, unidadesPorReceita: 5,
     recursos: [
       { nome: "Pure Grass", quantidade: 42, imagem: "https://wiki.pokexgames.com/images/b/bc/Pure_Grass.png" }
     ]
@@ -47,7 +48,7 @@ const CRAFTS = [
     id: "seed",
     nome: "Seed",
     imagem: "https://wiki.pokexgames.com/images/2/2e/Seed.png",
-    tipo: "material", rank: "E", skill: 10, isBerrie: false,
+    tipo: "material", rank: "E", skill: 10, isBerrie: false, unidadesPorReceita: 80,
     recursos: [
       { nome: "Pure Grass", quantidade: 40, imagem: "https://wiki.pokexgames.com/images/b/bc/Pure_Grass.png" }
     ]
@@ -56,7 +57,7 @@ const CRAFTS = [
     id: "diamond-dust",
     nome: "Diamond Dust",
     imagem: "https://wiki.pokexgames.com/images/a/a3/Diamond-dust.gif",
-    tipo: "material", rank: "E", skill: 2, isBerrie: false,
+    tipo: "material", rank: "E", skill: 2, isBerrie: false, unidadesPorReceita: 20,
     recursos: [
       { nome: "Diamond", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/e/ea/Diamond.png" }
     ]
@@ -129,7 +130,7 @@ const CRAFTS = [
     id: "exotic-flower",
     nome: "Exotic Flower",
     imagem: "https://wiki.pokexgames.com/images/1/1e/Exotic_Flower.png",
-    tipo: "flor", rank: "E", skill: 0, isBerrie: false,
+    tipo: "flor", rank: "E", skill: 0, isBerrie: false, unidadesPorReceita: 5,
     recursos: [
       { nome: "Seed", quantidade: 20, imagem: "https://wiki.pokexgames.com/images/2/2e/Seed.png" },
       { nome: "Pure Grass", quantidade: 5, imagem: "https://wiki.pokexgames.com/images/b/bc/Pure_Grass.png" }
@@ -512,7 +513,7 @@ const CRAFTS = [
     id: "ultra-potion",
     nome: "Ultra Potion",
     imagem: "https://wiki.pokexgames.com/images/9/9e/Ultra_potion.png",
-    tipo: "poção", rank: "C", skill: 40, isBerrie: false,
+    tipo: "poção", rank: "C", skill: 40, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Water Gem", quantidade: 250, imagem: "https://wiki.pokexgames.com/images/7/75/Watergem.png" },
       { nome: "Enchanted Gem", quantidade: 250, imagem: "https://wiki.pokexgames.com/images/4/4c/EnchantedGem.png" },
@@ -824,7 +825,7 @@ const CRAFTS = [
     id: "hyper-potion",
     nome: "Hyper Potion",
     imagem: "https://wiki.pokexgames.com/images/8/88/Hyper_Poiton.png",
-    tipo: "poção", rank: "B", skill: 60, isBerrie: false,
+    tipo: "poção", rank: "B", skill: 60, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Water Gem", quantidade: 250, imagem: "https://wiki.pokexgames.com/images/c/c0/Water_gem.png" },
       { nome: "Essence of Fire", quantidade: 250, imagem: "https://wiki.pokexgames.com/images/9/94/Essence_of_fire.png" },
@@ -836,7 +837,7 @@ const CRAFTS = [
     id: "revive",
     nome: "Revive",
     imagem: "https://wiki.pokexgames.com/images/1/13/Revive.png",
-    tipo: "item", rank: "B", skill: 62, isBerrie: false,
+    tipo: "item", rank: "B", skill: 62, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Great Petal", quantidade: 50, imagem: "https://wiki.pokexgames.com/images/8/86/Great_Petal.png" },
       { nome: "Future Orb", quantidade: 100, imagem: "https://wiki.pokexgames.com/images/8/86/FutureooOrb.png" },
@@ -1330,7 +1331,7 @@ const CRAFTS = [
     id: "pure-strong-grass",
     nome: "Pure Strong Grass (100x)",
     imagem: "https://wiki.pokexgames.com/images/6/63/Pure_Strong_Grass.png",
-    tipo: "item", rank: "A", skill: 100, isBerrie: false,
+    tipo: "item", rank: "A", skill: 100, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "High Tech CHIP", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/a/a2/Hightechchip.png" }
     ]
@@ -1339,7 +1340,7 @@ const CRAFTS = [
     id: "ultimate-potion",
     nome: "Ultimate Potion (100x)",
     imagem: "https://wiki.pokexgames.com/images/8/84/Ultimate_Potion.png",
-    tipo: "poção", rank: "A", skill: 80, isBerrie: false,
+    tipo: "poção", rank: "A", skill: 80, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Psychic Spoon", quantidade: 17, imagem: "https://wiki.pokexgames.com/images/2/28/Psychic_Spoon.png" },
       { nome: "Future Orb", quantidade: 200, imagem: "https://wiki.pokexgames.com/images/8/86/FutureooOrb.png" },
@@ -1350,7 +1351,7 @@ const CRAFTS = [
     id: "restore-potion",
     nome: "Restore Potion (100x)",
     imagem: "https://wiki.pokexgames.com/images/8/81/Restore_Potion.png",
-    tipo: "poção", rank: "A", skill: 80, isBerrie: false,
+    tipo: "poção", rank: "A", skill: 80, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Snake Tail", quantidade: 13, imagem: "https://wiki.pokexgames.com/images/6/6c/Snake_Tail.png" },
       { nome: "Seahorse Tail", quantidade: 10, imagem: "https://wiki.pokexgames.com/images/9/92/Seahorse_Tail.png" },
@@ -1362,7 +1363,7 @@ const CRAFTS = [
     id: "max-revive",
     nome: "Max Revive (100x)",
     imagem: "https://wiki.pokexgames.com/images/6/69/Max_revive.png",
-    tipo: "poção", rank: "A", skill: 80, isBerrie: false,
+    tipo: "poção", rank: "A", skill: 80, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Earth Stone", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/0/0f/Earth-stone.gif" },
       { nome: "Water Stone", quantidade: 1, imagem: "https://wiki.pokexgames.com/images/8/80/Water-stone.gif" },
@@ -1374,7 +1375,7 @@ const CRAFTS = [
     id: "strong-green-gem",
     nome: "Strong Green Gem (10x)",
     imagem: "https://wiki.pokexgames.com/images/1/18/Strong_Green_Gem.png",
-    tipo: "gema", rank: "A", skill: 82, isBerrie: false,
+    tipo: "gema", rank: "A", skill: 82, isBerrie: false, unidadesPorReceita: 10,
     recursos: [
       { nome: "Glacial Herb", quantidade: 5, imagem: "https://wiki.pokexgames.com/images/7/75/Glacial_Herb.png" },
       { nome: "Nature Herb", quantidade: 5, imagem: "https://wiki.pokexgames.com/images/d/d8/Nature_Herb.png" },
@@ -1891,7 +1892,7 @@ const CRAFTS = [
     id: "small-nightmare-spray",
     nome: "Small Nightmare Spray",
     imagem: "https://wiki.pokexgames.com/images/thumb/5/5c/Small_Nightmare_Spray.webp/17px-Small_Nightmare_Spray.webp.png",
-    tipo: "poção", rank: "S", skill: 100, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 100, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 90, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Sand Pouch", quantidade: 3, imagem: "https://wiki.pokexgames.com/images/b/bf/Sand_Pouch.png" },
@@ -1902,7 +1903,7 @@ const CRAFTS = [
     id: "small-nightmare-potion",
     nome: "Small Nightmare Potion",
     imagem: "https://wiki.pokexgames.com/images/thumb/c/cd/Small_Nightmare_Potion.webp/24px-Small_Nightmare_Potion.webp.png",
-    tipo: "poção", rank: "S", skill: 100, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 100, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 100, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Corrupted Doll Star", quantidade: 3, imagem: "https://wiki.pokexgames.com/images/f/f6/Corrupted-Doll-Star.gif" },
@@ -1914,7 +1915,7 @@ const CRAFTS = [
     id: "medium-nightmare-spray",
     nome: "Medium Nightmare Spray",
     imagem: "https://wiki.pokexgames.com/images/thumb/0/02/Medium_Nightmare_Spray.webp/16px-Medium_Nightmare_Spray.webp.png",
-    tipo: "poção", rank: "S", skill: 100, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 100, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 100, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Royal Mane", quantidade: 4, imagem: "https://wiki.pokexgames.com/images/2/20/Royal_Mane.png" },
@@ -1925,7 +1926,7 @@ const CRAFTS = [
     id: "medium-nightmare-potion",
     nome: "Medium Nightmare Potion",
     imagem: "https://wiki.pokexgames.com/images/thumb/c/c9/Medium_Nightmare_Potion.webp/23px-Medium_Nightmare_Potion.webp.png",
-    tipo: "poção", rank: "S", skill: 100, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 100, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 135, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Ice Crystal", quantidade: 3, imagem: "https://wiki.pokexgames.com/images/c/ca/Ice_Crystal.png" },
@@ -1938,7 +1939,7 @@ const CRAFTS = [
     id: "ultimate-nightmare-spray",
     nome: "Ultimate Nightmare Spray",
     imagem: "https://wiki.pokexgames.com/images/thumb/5/5b/Ultimate_Nightmare_Spray.webp/16px-Ultimate_Nightmare_Spray.webp.png",
-    tipo: "poção", rank: "S", skill: 103, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 103, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 135, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Ice Crystal", quantidade: 5, imagem: "https://wiki.pokexgames.com/images/c/ca/Ice_Crystal.png" },
@@ -1949,7 +1950,7 @@ const CRAFTS = [
     id: "ultimate-nightmare-potion",
     nome: "Ultimate Nightmare Potion",
     imagem: "https://wiki.pokexgames.com/images/thumb/c/ce/Ultimate_Nightmare_Potion.webp/22px-Ultimate_Nightmare_Potion.webp.png",
-    tipo: "poção", rank: "S", skill: 103, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 103, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Darkrai Essence", quantidade: 200, imagem: "https://wiki.pokexgames.com/images/0/01/Darkrai-Essence.gif" },
       { nome: "Corrupted Pot of Lava", quantidade: 5, imagem: "https://wiki.pokexgames.com/images/5/5a/Corrupted-Pot-of-Lava.gif" },
@@ -2439,7 +2440,7 @@ const CRAFTS = [
     id: "kamikaze-elixir",
     nome: "Kamikaze Elixir",
     imagem: "https://wiki.pokexgames.com/images/5/5c/Kamikaze_Elixir.png",
-    tipo: "elixir", rank: "S", skill: 103, isBerrie: false,
+    tipo: "elixir", rank: "S", skill: 103, isBerrie: false, unidadesPorReceita: 10,
     recursos: [
       { nome: "Dew Becker", quantidade: 240, imagem: "https://wiki.pokexgames.com/images/d/d7/Dew_Becker.png" },
       { nome: "Red Crushed Leaf", quantidade: 750, imagem: "https://wiki.pokexgames.com/images/0/09/Red_Crushed_Leaf.png" },
@@ -2451,7 +2452,7 @@ const CRAFTS = [
     id: "iron-wall-elixir",
     nome: "Iron Wall Elixir",
     imagem: "https://wiki.pokexgames.com/images/9/95/Iron_Wall_Elixir.png",
-    tipo: "elixir", rank: "S", skill: 105, isBerrie: false,
+    tipo: "elixir", rank: "S", skill: 105, isBerrie: false, unidadesPorReceita: 10,
     recursos: [
       { nome: "Dew Becker", quantidade: 240, imagem: "https://wiki.pokexgames.com/images/d/d7/Dew_Becker.png" },
       { nome: "Red Crushed Leaf", quantidade: 750, imagem: "https://wiki.pokexgames.com/images/0/09/Red_Crushed_Leaf.png" },
@@ -2475,7 +2476,7 @@ const CRAFTS = [
     id: "hot-nightmare-potion",
     nome: "Hot Nightmare Potion",
     imagem: "https://wiki.pokexgames.com/images/9/9a/Hot_Nightmare_Potion.png",
-    tipo: "poção", rank: "S", skill: 102, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 102, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Red Crushed Leaf", quantidade: 353, imagem: "https://wiki.pokexgames.com/images/0/09/Red_Crushed_Leaf.png" },
       { nome: "Yellow Crushed Leaf", quantidade: 353, imagem: "https://wiki.pokexgames.com/images/5/53/Yellow_Crushed_Leaf.png" },
@@ -2487,7 +2488,7 @@ const CRAFTS = [
     id: "black-nightmare-potion",
     nome: "Black Nightmare Potion",
     imagem: "https://wiki.pokexgames.com/images/5/5a/Black_Nightmare_Potion.png",
-    tipo: "poção", rank: "S", skill: 101, isBerrie: false,
+    tipo: "poção", rank: "S", skill: 101, isBerrie: false, unidadesPorReceita: 100,
     recursos: [
       { nome: "Red Crushed Leaf", quantidade: 1030, imagem: "https://wiki.pokexgames.com/images/0/09/Red_Crushed_Leaf.png" },
       { nome: "Yellow Crushed Leaf", quantidade: 1030, imagem: "https://wiki.pokexgames.com/images/5/53/Yellow_Crushed_Leaf.png" },

@@ -1,41 +1,25 @@
 /* ============================================================
-   PXG Professor Craft Calculator — App Core (Fases 3+4)
+   PXG Adventurer Craft Calculator — App Core
    Persistência no localStorage, renderização dinâmica
    e motor de cálculo de custo/receita/lucro.
+
+   Estrutura espelhada no app.js do Professor, exceto:
+   - sem sistema de berries (isBerrie / multiplicadores)
+   - sem rank NPC Zame
+   - sem dica de Crushed Leaf (helper específico do Professor)
    ============================================================ */
 
 (function () {
   "use strict";
 
   // ---------- Constantes ----------
-  const LS_KEY = "pxg-professor-craft-v1";
-  // Sitrus Seed e Red Sitrus Seed têm multiplicadores fixos de 2 / 2.5.
-  // Todos os outros berries usam os valores configurados pelo usuário em state.berrieMedia / state.berrieSorte.
-  const FIXED_SITRUS_MEDIA = 2;
-  const FIXED_SITRUS_SORTE = 2.5;
-  const SITRUS_FIXED_IDS = new Set(["sitrus-seed", "red-sitrus-seed"]);
-  const DEFAULT_BERRIE_MEDIA = 2;
-  const DEFAULT_BERRIE_SORTE = 2.5;
-  // Rótulos de rank que não seguem o padrão "Rank X" na badge.
-  const RANK_LABELS = { ZAME: "NPC Zame" };
-
-  // Recursos derivados: cada Medicinal Leaf gera 4 Crushed Leaf.
-  // Usado para mostrar uma dica auxiliar ("≈ X medicinal leaves") nos crafts
-  // que pedem crushed leaf, sem alterar a receita em si.
-  const CRUSHED_LEAF_SOURCES = {
-    "Red Crushed Leaf": "Red Medicinal Leaves",
-    "Yellow Crushed Leaf": "Yellow Medicinal Leaves",
-    "Green Crushed Leaf": "Green Medicinal Leaf",
-  };
-  const CRUSHED_PER_LEAF = 4;
+  const LS_KEY = "pxg-adventurer-craft-v1";
 
   // ---------- Estado ----------
   /**
    * state (por profissão — chave LS_KEY) = {
    *   sales:              { [craftId]: { npc, market } },
    *   quantity:           number,
-   *   berrieMedia:        number,    // só Professor
-   *   berrieSorte:        number,    // só Professor
    *   selected:           string[],
    *   showOnlySelected:   boolean,
    *   subQty:             { [craftId]: number }
@@ -49,10 +33,10 @@
   const state = loadState();
 
   // Índices auxiliares (preenchidos no init)
-  const craftsById = {};        // id -> craft
-  const resourceIndex = {};     // resourceName -> Set<craftId>
-  const craftIdByName = new Map(); // nome normalizado -> craftId (resolve sub-receitas)
-  const lootByName = new Map(); // nome normalizado -> { id, nome, droppadoPor }
+  const craftsById = {};
+  const resourceIndex = {};
+  const craftIdByName = new Map();
+  const lootByName = new Map();
 
   function normalizeName(s) {
     return String(s)
@@ -68,55 +52,15 @@
       const raw = localStorage.getItem(LS_KEY);
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-
-      // Migração one-shot: estados anteriores guardavam resources/semDroppers/tax
-      // na chave do Professor. Lifta pro PxgShared e remove daqui.
-      let migrated = false;
-      if (parsed.resources && typeof parsed.resources === "object") {
-        const n = PxgShared.importPrices(parsed.resources);
-        if (n > 0) console.info(`[migração] ${n} preços de recurso movidos para PxgShared`);
-        delete parsed.resources;
-        migrated = true;
-      }
-      if (parsed.semDroppers && typeof parsed.semDroppers === "object") {
-        const n = PxgShared.importSemDroppers(parsed.semDroppers);
-        if (n > 0) console.info(`[migração] ${n} flags semDroppers movidas para PxgShared`);
-        delete parsed.semDroppers;
-        migrated = true;
-      }
-      if (typeof parsed.tax === "number") {
-        // só importa se PxgShared ainda não tem tax setado
-        if (!PxgShared.getMarketTax() && parsed.tax > 0) {
-          PxgShared.setMarketTax(parsed.tax);
-          console.info(`[migração] taxa do market (${parsed.tax}%) movida para PxgShared`);
-        }
-        delete parsed.tax;
-        migrated = true;
-      }
-
-      const result = {
+      return {
         sales: parsed.sales || {},
         quantity: typeof parsed.quantity === "number" && parsed.quantity > 0
           ? parsed.quantity
           : 1,
-        berrieMedia: typeof parsed.berrieMedia === "number" && parsed.berrieMedia > 0
-          ? parsed.berrieMedia
-          : DEFAULT_BERRIE_MEDIA,
-        berrieSorte: typeof parsed.berrieSorte === "number" && parsed.berrieSorte > 0
-          ? parsed.berrieSorte
-          : DEFAULT_BERRIE_SORTE,
         selected: Array.isArray(parsed.selected) ? parsed.selected : [],
         showOnlySelected: !!parsed.showOnlySelected,
         subQty: parsed.subQty && typeof parsed.subQty === "object" ? parsed.subQty : {},
       };
-
-      if (migrated) {
-        // Persiste o estado já sem os campos migrados
-        try {
-          localStorage.setItem(LS_KEY, JSON.stringify(result));
-        } catch (e) { /* segue */ }
-      }
-      return result;
     } catch (e) {
       console.warn("Erro lendo localStorage, usando estado padrão.", e);
       return defaultState();
@@ -127,8 +71,6 @@
     return {
       sales: {},
       quantity: 1,
-      berrieMedia: DEFAULT_BERRIE_MEDIA,
-      berrieSorte: DEFAULT_BERRIE_SORTE,
       selected: [],
       showOnlySelected: false,
       subQty: {},
@@ -184,12 +126,6 @@
     return idx;
   }
 
-  /**
-   * Resolve recursivamente todos os crafts necessários para produzir os IDs
-   * fornecidos, seguindo os recursos que são em si outros crafts do dataset.
-   * Retorna { all: Set<id>, deps: Set<id> } — all = selecionados ∪ sub-receitas,
-   * deps = apenas as sub-receitas (para marcação visual).
-   */
   function resolveSelectionTree(selectedIds) {
     const selectedSet = new Set(selectedIds);
     const all = new Set(selectedIds);
@@ -211,10 +147,8 @@
     return { all, deps };
   }
 
-  // Conjunto atual de sub-receitas (deps) e quantidade requerida agregada por id.
-  // Recomputado sempre que a seleção muda.
   let currentDepsSet = new Set();
-  let requiredByDep = new Map(); // id -> quantidade total demandada pelos pais
+  let requiredByDep = new Map();
 
   function recomputeDepsAndRequirements() {
     currentDepsSet = new Set();
@@ -222,15 +156,11 @@
     if (state.selected.length === 0) return;
 
     const globalQty = Math.max(1, state.quantity || 1);
-    const selectedSet = new Set(state.selected);
 
-    // BFS propagando o DELTA de cada caminho (não o acumulado), para que dois
-    // pais que demandam o mesmo filho não causem dupla contagem nos netos.
-    // Cada item da fila = { id, qty } onde qty é a demanda específica daquela aresta.
     const queue = [];
     for (const id of state.selected) queue.push({ id, qty: globalQty });
 
-    let safety = 50000; // proteção contra ciclos imprevistos no dataset
+    let safety = 50000;
     while (queue.length && safety-- > 0) {
       const { id: parentId, qty: parentQty } = queue.shift();
       const parent = craftsById[parentId];
@@ -240,14 +170,12 @@
         if (!childId) continue;
         const demand = r.quantidade * parentQty;
         requiredByDep.set(childId, (requiredByDep.get(childId) || 0) + demand);
-        // Inclui crafts selecionados também — eles podem acumular badge "sub-receita"
-        // e somar a demanda dos pais à própria quantidade global.
         currentDepsSet.add(childId);
         queue.push({ id: childId, qty: demand });
       }
     }
     if (safety <= 0) {
-      console.warn("recomputeDepsAndRequirements: safety hit — possível ciclo em CRAFTS");
+      console.warn("recomputeDepsAndRequirements: safety hit — possível ciclo em CRAFTS_ADVENTURER");
     }
   }
 
@@ -262,14 +190,6 @@
     if (changed) saveState();
   }
 
-  /**
-   * Quantidade efetiva usada nos cálculos de um craft, com breakdown:
-   * - Selecionado + sub-receita: qty global (própria) + demanda dos pais
-   * - Selecionado puro: qty global
-   * - Sub-receita pura: override (se > 0) ou demanda agregada dos pais
-   * - Nenhum dos casos: qty global
-   * Retorna { total, own, sub, source }.
-   */
   function getQuantityBreakdown(craft) {
     const id = craft.id;
     const globalQty = Math.max(1, state.quantity || 1);
@@ -293,10 +213,6 @@
       }
     }
     return { total: globalQty, own: globalQty, sub: 0, source: "global" };
-  }
-
-  function getEffectiveQuantity(craft) {
-    return getQuantityBreakdown(craft).total;
   }
 
   function isSelected(id) {
@@ -339,7 +255,6 @@
     const clearBtn = document.getElementById("btnClearSelected");
     if (clearBtn) clearBtn.disabled = count === 0;
 
-    // Atualiza estado visual das estrelas em cards já renderizados
     const cards = document.querySelectorAll(".craft-card");
     for (const card of cards) {
       const id = card.dataset.craftId;
@@ -376,26 +291,6 @@
   }
 
   // ---------- Motor de cálculo ----------
-  /**
-   * Retorna os multiplicadores de berry (média / sorte) para um craft específico.
-   * Sitrus Seed e Red Sitrus Seed são fixos em 2 / 2.5. Os demais usam o valor
-   * configurado pelo usuário (state.berrieMedia / state.berrieSorte).
-   */
-  function getBerrieMultipliers(craft) {
-    if (SITRUS_FIXED_IDS.has(craft.id)) {
-      return { media: FIXED_SITRUS_MEDIA, sorte: FIXED_SITRUS_SORTE };
-    }
-    return {
-      media: state.berrieMedia || DEFAULT_BERRIE_MEDIA,
-      sorte: state.berrieSorte || DEFAULT_BERRIE_SORTE,
-    };
-  }
-
-  /**
-   * Unidades vendáveis produzidas por cada receita (antes de aplicar a
-   * quantidade global). Lido do campo `unidadesPorReceita` no dataset;
-   * default 1 quando ausente. Berries usam lógica própria (média/sorte).
-   */
   function getUnitsPerRecipe(craft) {
     if (typeof craft.unidadesPorReceita === "number" && craft.unidadesPorReceita > 0) {
       return craft.unidadesPorReceita;
@@ -403,13 +298,6 @@
     return 1;
   }
 
-  /**
-   * Calcula custo, receita e lucro de um craft considerando quantidade global.
-   * - Para berries: multiplicadores por craft (fixos p/ Sitrus, custom p/ outros).
-   * - Para itens comuns: 1 craft = 1 item vendido.
-   * - Market sempre aplica (1 - taxa%).
-   * - Tudo escala com state.quantity.
-   */
   function calculateCraft(craft) {
     const bd = getQuantityBreakdown(craft);
     const qty = bd.total;
@@ -428,33 +316,6 @@
     const marketUnit = sale.market || 0;
     const taxFactor = 1 - (PxgShared.getMarketTax() || 0) / 100;
 
-    if (craft.isBerrie) {
-      const { media, sorte } = getBerrieMultipliers(craft);
-      const mediaOut = media * qty;
-      const sorteOut = sorte * qty;
-      return {
-        cost,
-        resourceCosts,
-        quantity: qty,
-        breakdown: bd,
-        isBerrie: true,
-        mediaMult: media,
-        sorteMult: sorte,
-        media: {
-          npcRevenue: npcUnit * mediaOut,
-          npcProfit: npcUnit * mediaOut - cost,
-          marketRevenue: marketUnit * mediaOut * taxFactor,
-          marketProfit: marketUnit * mediaOut * taxFactor - cost,
-        },
-        sorte: {
-          npcRevenue: npcUnit * sorteOut,
-          npcProfit: npcUnit * sorteOut - cost,
-          marketRevenue: marketUnit * sorteOut * taxFactor,
-          marketProfit: marketUnit * sorteOut * taxFactor - cost,
-        },
-      };
-    }
-
     const unitsPerRecipe = getUnitsPerRecipe(craft);
     const totalUnits = unitsPerRecipe * qty;
     return {
@@ -462,7 +323,6 @@
       resourceCosts,
       quantity: qty,
       breakdown: bd,
-      isBerrie: false,
       unitsPerRecipe,
       totalUnits,
       npcRevenue: npcUnit * totalUnits,
@@ -529,7 +389,6 @@
     checkLabel.appendChild(checkText);
     check.addEventListener("change", () => {
       PxgShared.setSemDroppers(r.nome, check.checked);
-      // re-render esta linha pra atualizar badge + visibilidade do input
       const newRow = buildResourceRow(r);
       item.replaceWith(newRow);
       recalcByResource(r.nome);
@@ -548,11 +407,6 @@
     return item;
   }
 
-  // Deriva os badges informativos do recurso a partir de:
-  //   - flag manual semDroppers (mutuamente exclusiva — esconde os outros)
-  //   - match em sub-receita (craftIdByName)  → coexiste com loot
-  //   - match em loot-data (lootByName)        → coexiste com sub-receita
-  //   - fallback: ⚠ Sem info
   function buildResourceBadges(r) {
     const isSemDroppers = PxgShared.isSemDroppers(r.nome);
     const nameKey = normalizeName(r.nome);
@@ -570,8 +424,8 @@
     if (subCraftId && subCraftId !== r.id) {
       const b = document.createElement("span");
       b.className = "res-badge res-badge-subcraft";
-      b.textContent = "↳ Receita do Professor";
-      b.title = "Esse recurso também é uma receita do Professor — o custo dele pode ser calculado a partir dos ingredientes dele";
+      b.textContent = "↳ Receita do Aventureiro";
+      b.title = "Esse recurso também é uma receita do Aventureiro — o custo dele pode ser calculado a partir dos ingredientes dele";
       badges.push(b);
     }
     if (lootItem) {
@@ -593,7 +447,6 @@
 
     if (badges.length > 0) return badges;
 
-    // Sem flag, sem sub-craft, sem loot → convite a marcar
     const b = document.createElement("span");
     b.className = "res-badge res-badge-unknown";
     b.textContent = "⚠ Sem info";
@@ -601,9 +454,6 @@
     return [b];
   }
 
-  // Junta os ingredientes "linkáveis" (têm match em loot-data e não estão marcados
-  // como sem drop) e devolve um botão que abre o loot tracker pré-filtrado.
-  // Retorna null se nenhum ingrediente é linkável.
   function buildRecipeDroppersButton(craft) {
     const ids = [];
     const seen = new Set();
@@ -646,14 +496,12 @@
     card.dataset.craftId = craft.id;
     card.dataset.rank = craft.rank;
     card.dataset.tipo = craft.tipo;
-    card.dataset.berrie = String(!!craft.isBerrie);
     card.dataset.name = craft.nome.toLowerCase();
     card.dataset.resources = craft.recursos
       .map((r) => r.nome.toLowerCase())
       .join("|");
     if (isSelected(craft.id)) card.classList.add("is-selected");
 
-    // Botão estrela (seleção)
     const star = document.createElement("button");
     star.type = "button";
     star.className = "craft-star";
@@ -669,7 +517,6 @@
     });
     card.appendChild(star);
 
-    // Cabeçalho
     const head = document.createElement("div");
     head.className = "craft-head";
 
@@ -686,7 +533,7 @@
 
     const tagRank = document.createElement("span");
     tagRank.className = `tag tag-rank tag-rank-${craft.rank}`;
-    tagRank.textContent = RANK_LABELS[craft.rank] || `Rank ${craft.rank}`;
+    tagRank.textContent = `Rank ${craft.rank}`;
     meta.appendChild(tagRank);
 
     const tagTipo = document.createElement("span");
@@ -701,13 +548,6 @@
       meta.appendChild(tagSkill);
     }
 
-    if (craft.isBerrie) {
-      const tagBerrie = document.createElement("span");
-      tagBerrie.className = "tag tag-berrie";
-      tagBerrie.textContent = "Berrie";
-      meta.appendChild(tagBerrie);
-    }
-
     const unitsPerRecipe = getUnitsPerRecipe(craft);
     if (unitsPerRecipe > 1) {
       const tagYield = document.createElement("span");
@@ -716,11 +556,18 @@
       meta.appendChild(tagYield);
     }
 
+    if (craft.tempo) {
+      const tagTempo = document.createElement("span");
+      tagTempo.className = "tag tag-tempo";
+      tagTempo.textContent = `⏱ ${craft.tempo}`;
+      tagTempo.title = "Tempo de craft";
+      meta.appendChild(tagTempo);
+    }
+
     titleWrap.appendChild(meta);
     head.appendChild(titleWrap);
     card.appendChild(head);
 
-    // Recursos
     const resourcesBox = document.createElement("div");
     resourcesBox.className = "craft-resources";
 
@@ -751,23 +598,12 @@
       row.appendChild(rname);
       row.appendChild(rcost);
       resourcesBox.appendChild(row);
-
-      if (CRUSHED_LEAF_SOURCES[r.nome]) {
-        const hint = document.createElement("div");
-        hint.className = "res-hint";
-        hint.dataset.role = "res-hint";
-        hint.dataset.source = CRUSHED_LEAF_SOURCES[r.nome];
-        hint.textContent = "";
-        resourcesBox.appendChild(hint);
-      }
     }
     card.appendChild(resourcesBox);
 
-    // Botão "ver droppers da receita" — abre loot.html já filtrado
     const droppersBtn = buildRecipeDroppersButton(craft);
     if (droppersBtn) card.appendChild(droppersBtn);
 
-    // Override de quantidade quando craft é sub-receita (escondido por padrão)
     const subBox = document.createElement("div");
     subBox.className = "subrecipe-qty hidden";
     const subLabel = document.createElement("label");
@@ -793,12 +629,11 @@
     subBox.appendChild(subAuto);
     card.appendChild(subBox);
 
-    // Inputs de venda
     const sale = document.createElement("div");
     sale.className = "craft-sale";
 
     const savedSale = state.sales[craft.id] || {};
-    const multiSale = craft.isBerrie || unitsPerRecipe > 1;
+    const multiSale = unitsPerRecipe > 1;
     sale.appendChild(
       buildSaleField(
         craft.id,
@@ -817,13 +652,10 @@
     );
     card.appendChild(sale);
 
-    // Resumo (estrutura difere para berries x comuns)
     const summary = document.createElement("div");
     summary.className = "craft-summary";
     summary.dataset.role = "summary";
-    summary.innerHTML = craft.isBerrie
-      ? buildBerrieSummaryHTML()
-      : buildNormalSummaryHTML();
+    summary.innerHTML = buildNormalSummaryHTML();
     card.appendChild(summary);
 
     return card;
@@ -854,51 +686,6 @@
       <div class="summary-row">
         <span class="label">Lucro</span>
         <span class="value value-neutral" data-role="profit-market">—</span>
-      </div>
-    `;
-  }
-
-  function buildBerrieSummaryHTML() {
-    return `
-      <div class="summary-row">
-        <span class="label" data-role="cost-label">Custo total</span>
-        <span class="value value-neutral" data-role="cost">—</span>
-      </div>
-      <div class="summary-divider"></div>
-      <div class="summary-section-title" data-role="title-media">Média Normal</div>
-      <div class="summary-row">
-        <span class="label">Receita NPC</span>
-        <span class="value value-neutral" data-role="rev-media-npc">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Lucro NPC</span>
-        <span class="value value-neutral" data-role="profit-media-npc">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Receita Market</span>
-        <span class="value value-neutral" data-role="rev-media-market">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Lucro Market</span>
-        <span class="value value-neutral" data-role="profit-media-market">—</span>
-      </div>
-      <div class="summary-divider"></div>
-      <div class="summary-section-title" data-role="title-sorte">Cenário Sorte</div>
-      <div class="summary-row">
-        <span class="label">Receita NPC</span>
-        <span class="value value-neutral" data-role="rev-sorte-npc">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Lucro NPC</span>
-        <span class="value value-neutral" data-role="profit-sorte-npc">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Receita Market</span>
-        <span class="value value-neutral" data-role="rev-sorte-market">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="label">Lucro Market</span>
-        <span class="value value-neutral" data-role="profit-sorte-market">—</span>
       </div>
     `;
   }
@@ -964,7 +751,6 @@
   function recalcCard(card, craft) {
     const calc = calculateCraft(craft);
 
-    // Quantidade e custo por recurso (ambos escalam com state.quantity)
     const resourceRows = card.querySelectorAll(".craft-resource");
     craft.recursos.forEach((r, i) => {
       const row = resourceRows[i];
@@ -983,25 +769,12 @@
       } else {
         costEl.textContent = "—";
       }
-
-      const hintEl = row.nextElementSibling;
-      if (hintEl && hintEl.dataset && hintEl.dataset.role === "res-hint") {
-        const totalQty = r.quantidade * calc.quantity;
-        const leaves = totalQty / CRUSHED_PER_LEAF;
-        const rounded = Math.round(leaves * 100) / 100;
-        const txt = Number.isInteger(rounded)
-          ? String(rounded)
-          : rounded.toString().replace(".", ",");
-        hintEl.textContent = `≈ ${txt} ${hintEl.dataset.source}`;
-      }
     });
 
-    // Rótulo "Custo total" — combina ×N, breakdown próprio+sub-receita e (poções) unidades.
     const costLabel = card.querySelector('[data-role="cost-label"]');
     if (costLabel) {
       const bd = calc.breakdown || { total: calc.quantity, own: calc.quantity, sub: 0, source: "global" };
       let parts = [];
-      // Breakdown principal (×N)
       if (bd.source === "selected+sub") {
         parts.push(`×${formatBR(bd.total)} = ${formatBR(bd.own)} global + ${formatBR(bd.sub)} sub-receita`);
       } else if (bd.source === "sub") {
@@ -1011,8 +784,7 @@
       } else if (bd.total > 1) {
         parts.push(`×${formatBR(bd.total)}`);
       }
-      // Para poções, anexa o total de unidades produzidas
-      if (!calc.isBerrie && calc.unitsPerRecipe > 1) {
+      if (calc.unitsPerRecipe > 1) {
         parts.push(`${formatBR(calc.totalUnits)} un.`);
       }
       costLabel.textContent = parts.length
@@ -1020,34 +792,16 @@
         : "Custo total";
     }
 
-    // Custo total
     setNeutralValue(card.querySelector('[data-role="cost"]'), calc.cost);
 
     const sale = state.sales[craft.id] || {};
     const hasNpc = (sale.npc || 0) > 0;
     const hasMarket = (sale.market || 0) > 0;
 
-    if (craft.isBerrie) {
-      // Títulos dinâmicos com multiplicadores atuais
-      const titleMedia = card.querySelector('[data-role="title-media"]');
-      const titleSorte = card.querySelector('[data-role="title-sorte"]');
-      if (titleMedia) titleMedia.textContent = `Média Normal (×${calc.mediaMult})`;
-      if (titleSorte) titleSorte.textContent = `Cenário Sorte (×${calc.sorteMult})`;
-
-      setNeutralValue(card.querySelector('[data-role="rev-media-npc"]'), calc.media.npcRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-media-npc"]'), calc.media.npcProfit, hasNpc);
-      setNeutralValue(card.querySelector('[data-role="rev-media-market"]'), calc.media.marketRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-media-market"]'), calc.media.marketProfit, hasMarket);
-      setNeutralValue(card.querySelector('[data-role="rev-sorte-npc"]'), calc.sorte.npcRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-sorte-npc"]'), calc.sorte.npcProfit, hasNpc);
-      setNeutralValue(card.querySelector('[data-role="rev-sorte-market"]'), calc.sorte.marketRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-sorte-market"]'), calc.sorte.marketProfit, hasMarket);
-    } else {
-      setNeutralValue(card.querySelector('[data-role="rev-npc"]'), calc.npcRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-npc"]'), calc.npcProfit, hasNpc);
-      setNeutralValue(card.querySelector('[data-role="rev-market"]'), calc.marketRevenue);
-      setProfitValue(card.querySelector('[data-role="profit-market"]'), calc.marketProfit, hasMarket);
-    }
+    setNeutralValue(card.querySelector('[data-role="rev-npc"]'), calc.npcRevenue);
+    setProfitValue(card.querySelector('[data-role="profit-npc"]'), calc.npcProfit, hasNpc);
+    setNeutralValue(card.querySelector('[data-role="rev-market"]'), calc.marketRevenue);
+    setProfitValue(card.querySelector('[data-role="profit-market"]'), calc.marketProfit, hasMarket);
   }
 
   function recalcCraft(craftId) {
@@ -1065,14 +819,13 @@
   }
 
   function recalcAll() {
-    for (const craft of CRAFTS) recalcCraft(craft.id);
+    for (const craft of CRAFTS_ADVENTURER) recalcCraft(craft.id);
   }
 
   // ---------- Filtros / Busca ----------
   function applyCraftFilters() {
     const rank = document.getElementById("filterRank").value;
     const tipo = document.getElementById("filterTipo").value;
-    const onlyBerrie = document.getElementById("filterBerrie").checked;
     const q = document
       .getElementById("searchCraft")
       .value.trim()
@@ -1082,8 +835,6 @@
       .value.trim()
       .toLowerCase();
 
-    // currentDepsSet já está computado a partir da seleção atual.
-    // selectionAll = selecionados ∪ deps (usado apenas pelo filtro "ver selecionados").
     let selectionAll = null;
     if (state.showOnlySelected && state.selected.length > 0) {
       selectionAll = new Set([...state.selected, ...currentDepsSet]);
@@ -1094,22 +845,17 @@
     for (const card of cards) {
       const id = card.dataset.craftId;
       const okSelection = !selectionAll || selectionAll.has(id);
-      // Sub-receitas de itens selecionados ignoram busca/filtros quando
-      // "ver selecionados" está ativo — elas aparecem por dependência.
       const isPureDep =
         !!selectionAll && currentDepsSet.has(id) && !isSelected(id);
       const okRank = isPureDep || !rank || card.dataset.rank === rank;
       const okTipo = isPureDep || !tipo || card.dataset.tipo === tipo;
-      const okBerrie =
-        isPureDep || !onlyBerrie || card.dataset.berrie === "true";
       const okSearch = isPureDep || !q || card.dataset.name.includes(q);
       const okResSearch =
         isPureDep || !qRes || (card.dataset.resources || "").includes(qRes);
       const show =
-        okSelection && okRank && okTipo && okBerrie && okSearch && okResSearch;
+        okSelection && okRank && okTipo && okSearch && okResSearch;
       card.classList.toggle("hidden", !show);
 
-      // is-dependency vale sempre que o craft é sub-receita de algum selecionado
       const isDep = currentDepsSet.has(id);
       const isSel = isSelected(id);
       const isPureSub = isDep && !isSel;
@@ -1117,9 +863,6 @@
       card.classList.toggle("is-dependency", isPureSub);
       card.classList.toggle("is-selected-sub", isSelectedSub);
 
-      // Tag "sub-receita":
-      //  - sempre visível em cards selecionados que também são sub-receita
-      //  - em sub-receitas puras: só dentro do modo "ver selecionados"
       let depTag = card.querySelector(".dep-tag");
       const showTag = isSelectedSub || (isPureSub && state.showOnlySelected);
       if (showTag) {
@@ -1137,7 +880,6 @@
         depTag.remove();
       }
 
-      // Override de quantidade aparece SÓ em sub-receitas puras (não selecionadas)
       const subBox = card.querySelector(".subrecipe-qty");
       if (subBox) {
         subBox.classList.toggle("hidden", !isPureSub);
@@ -1177,26 +919,23 @@
 
   // ---------- Inicialização ----------
   function init() {
-    if (typeof CRAFTS === "undefined" || !Array.isArray(CRAFTS)) {
-      console.error("CRAFTS não está disponível. Verifique data.js.");
+    if (typeof CRAFTS_ADVENTURER === "undefined" || !Array.isArray(CRAFTS_ADVENTURER)) {
+      console.error("CRAFTS_ADVENTURER não está disponível. Verifique adventurer-data.js.");
       return;
     }
 
-    // Índices
-    for (const c of CRAFTS) {
+    for (const c of CRAFTS_ADVENTURER) {
       craftsById[c.id] = c;
       craftIdByName.set(normalizeName(c.nome), c.id);
     }
-    Object.assign(resourceIndex, buildResourceIndex(CRAFTS));
+    Object.assign(resourceIndex, buildResourceIndex(CRAFTS_ADVENTURER));
 
-    // Índice de loot (opcional — loot-data.js pode não estar carregado)
     if (typeof LOOT_ITEMS !== "undefined" && Array.isArray(LOOT_ITEMS)) {
       for (const it of LOOT_ITEMS) {
         lootByName.set(normalizeName(it.nome), it);
       }
     }
 
-    // Remove IDs que não existem mais (caso data.js tenha mudado)
     state.selected = state.selected.filter((id) => craftsById[id]);
     for (const id of Object.keys(state.subQty)) {
       if (!craftsById[id]) delete state.subQty[id];
@@ -1204,27 +943,22 @@
     recomputeDepsAndRequirements();
     cleanupOrphanedSubQty();
 
-    // Contagem
     document.getElementById("craftCount").textContent =
-      `${CRAFTS.length} crafts`;
+      `${CRAFTS_ADVENTURER.length} crafts`;
 
-    // Recursos únicos
-    const resources = getUniqueResources(CRAFTS);
+    const resources = getUniqueResources(CRAFTS_ADVENTURER);
     renderResourceInputs(resources);
 
-    // Tipos no filtro
     const tipoSelect = document.getElementById("filterTipo");
-    for (const t of getUniqueTipos(CRAFTS)) {
+    for (const t of getUniqueTipos(CRAFTS_ADVENTURER)) {
       const opt = document.createElement("option");
       opt.value = t;
       opt.textContent = t;
       tipoSelect.appendChild(opt);
     }
 
-    // Cards
-    renderCraftCards(CRAFTS);
+    renderCraftCards(CRAFTS_ADVENTURER);
 
-    // Taxa do market (compartilhada entre profissões via PxgShared)
     const taxInput = document.getElementById("taxMarket");
     const currentTax = PxgShared.getMarketTax();
     taxInput.value = currentTax > 0 ? currentTax : "";
@@ -1233,7 +967,6 @@
       recalcAll();
     });
 
-    // Quantidade a craftar
     const qtyInput = document.getElementById("craftQty");
     qtyInput.value = state.quantity > 1 ? state.quantity : "";
     qtyInput.addEventListener("input", () => {
@@ -1245,37 +978,11 @@
       recalcAll();
     });
 
-    // Média padrão de berries
-    const bMediaInput = document.getElementById("berrieMedia");
-    bMediaInput.value =
-      state.berrieMedia !== DEFAULT_BERRIE_MEDIA ? state.berrieMedia : "";
-    bMediaInput.addEventListener("input", () => {
-      const v = parseNumberInput(bMediaInput.value);
-      state.berrieMedia = v > 0 ? v : DEFAULT_BERRIE_MEDIA;
-      saveState();
-      recalcAll();
-    });
-
-    // Média com sorte padrão de berries
-    const bSorteInput = document.getElementById("berrieSorte");
-    bSorteInput.value =
-      state.berrieSorte !== DEFAULT_BERRIE_SORTE ? state.berrieSorte : "";
-    bSorteInput.addEventListener("input", () => {
-      const v = parseNumberInput(bSorteInput.value);
-      state.berrieSorte = v > 0 ? v : DEFAULT_BERRIE_SORTE;
-      saveState();
-      recalcAll();
-    });
-
-    // Filtros
     document
       .getElementById("filterRank")
       .addEventListener("change", applyCraftFilters);
     document
       .getElementById("filterTipo")
-      .addEventListener("change", applyCraftFilters);
-    document
-      .getElementById("filterBerrie")
       .addEventListener("change", applyCraftFilters);
     document
       .getElementById("searchCraft")
@@ -1287,7 +994,6 @@
       .getElementById("searchResource")
       .addEventListener("input", applyResourceSearch);
 
-    // Seleção: toggle "ver selecionados" + limpar
     const btnToggle = document.getElementById("btnToggleSelected");
     const btnClear = document.getElementById("btnClearSelected");
     btnToggle.addEventListener("click", () => {
@@ -1304,12 +1010,8 @@
       clearSelection();
     });
     updateSelectionUI();
-    // Sempre roda os filtros uma vez no boot — garante que campos de override
-    // de sub-receitas apareçam mesmo sem o "ver selecionados" estar ativo.
     applyCraftFilters();
 
-    // Reset (apaga apenas estado deste app — preços de recurso, taxa e
-    // semDroppers ficam intactos pois são compartilhados entre profissões)
     document.getElementById("btnReset").addEventListener("click", () => {
       const ok = confirm(
         "Apagar dados deste calculador (seleção, vendas, quantidade)?\n\nPreços de recursos e taxa do market são compartilhados com outras profissões e NÃO serão apagados."
@@ -1319,17 +1021,13 @@
       location.reload();
     });
 
-    // Sync cross-tab: se outra profissão (ou aba) muda preço/taxa/semDroppers,
-    // re-renderiza inputs locais e recalcula.
     PxgShared.onChange(() => {
-      // Re-popula inputs de preço
       for (const input of document.querySelectorAll("#resourceInputs input[type=number]")) {
         const name = input.dataset.resourceName;
         if (!name) continue;
         const p = PxgShared.getPrice(name);
         input.value = p > 0 ? p : "";
       }
-      // Re-popula checkboxes semDroppers e classe visual
       for (const cb of document.querySelectorAll("#resourceInputs input[type=checkbox]")) {
         const name = cb.dataset.resourceName;
         if (!name) continue;
@@ -1337,13 +1035,11 @@
         const row = cb.closest(".resource-item");
         if (row) row.classList.toggle("is-sem-droppers", cb.checked);
       }
-      // Taxa do market
       const tax = PxgShared.getMarketTax();
       taxInput.value = tax > 0 ? tax : "";
       recalcAll();
     });
 
-    // Cálculo inicial com os valores carregados do localStorage
     recalcAll();
   }
 
