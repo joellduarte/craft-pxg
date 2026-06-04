@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rainbow Orbs Tracker — PXG</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-rainbow">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="logo">
+        <a href="index.html" class="topbar-back" title="Voltar ao Hub">←</a>
+        <span class="logo-mark">PXG</span>
+        <span class="logo-text">Rainbow Orbs Tracker</span>
+      </h1>
+      <div class="topbar-actions">
+        <a id="npcAlbertoLink" class="btn btn-ghost" target="_blank" rel="noopener noreferrer"
+           title="Abrir recompensas do NPC Alberto na wiki">
+          🎁 Recompensas (NPC Alberto ↗)
+        </a>
+        <button id="btnReset" class="btn btn-ghost" type="button"
+                title="Desmarcar todas as orbs">Resetar tudo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="rainbow-main">
+    <div class="rainbow-sticky-top">
+      <section class="panel rainbow-progress" aria-label="Progresso global">
+        <div class="rainbow-progress-text">
+          <span id="progressCount">0 / 0</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="rainbow-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="progressFill" class="rainbow-progress-fill"></div>
+        </div>
+      </section>
+
+      <section class="panel rainbow-controls" aria-label="Controles">
+        <div class="rainbow-controls-row">
+          <div class="rainbow-search-wrap">
+            <input id="searchOrb" type="search"
+                   placeholder="Buscar região ou coordenada (Ctrl+F)"
+                   autocomplete="off" />
+          </div>
+          <label class="check rainbow-hide-collected">
+            <input type="checkbox" id="hideCollected" />
+            <span>🔍 Esconder coletadas</span>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel panel-orbs">
+      <div id="orbsContainer" class="rainbow-regions">
+        <p class="loading">Carregando orbs...</p>
+      </div>
+      <p id="orbsEmpty" class="empty hidden">Nenhum resultado.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="rainbow-toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer">
+    <p>
+      Coordenadas compiladas da comunidade.
+      Recompensas via
+      <a href="https://wiki.pokexgames.com/index.php/NPC_Alberto#Recompensas"
+         target="_blank" rel="noopener noreferrer">NPC Alberto</a>.
+      Projeto não oficial.
+    </p>
+  </footer>
+
+  <script src="rainbow-orbs-data.js"></script>
+  <script src="rainbow-orbs.js"></script>
+</body>
+</html>
