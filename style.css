@@ -2158,3 +2158,388 @@ input[type="number"] {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Joey Quest Tracker
+   ============================================================ */
+.joey-main {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+  display: grid;
+  gap: 16px;
+}
+
+.joey-sticky-top {
+  position: sticky;
+  top: 67px;
+  z-index: 20;
+  display: grid;
+  gap: 16px;
+  background: var(--bg-0);
+  padding: 12px 0;
+  margin: -12px 0 0;
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 500px) {
+  .joey-sticky-top { top: 59px; }
+}
+
+.joey-progress {
+  padding: 16px 20px;
+}
+.joey-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+.joey-progress-text #progressCount {
+  font-weight: 600;
+  color: var(--text-0);
+}
+.joey-progress-text #progressPct {
+  color: var(--text-2);
+  font-size: 0.9rem;
+}
+.joey-progress-bar {
+  height: 8px;
+  background: var(--bg-3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.joey-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ffcb05, #5eff90, #5ecfff);
+  transition: width 0.3s ease;
+}
+
+.joey-controls {
+  padding: 12px 16px;
+}
+.joey-controls-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.joey-search-wrap {
+  flex: 1;
+  min-width: 240px;
+}
+.joey-search-wrap input {
+  width: 100%;
+  background: var(--bg-2);
+  color: var(--text-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.92rem;
+}
+.joey-search-wrap input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+.joey-hide-captured {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-1);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+/* ---- Info bar ---- */
+.joey-info {
+  padding: 12px 16px;
+}
+.joey-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 0.9rem;
+  color: var(--text-1);
+}
+.joey-info-item strong {
+  color: var(--text-0);
+  margin-right: 4px;
+}
+
+/* ---- Section titles ---- */
+.joey-section-title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--text-0);
+  margin-bottom: 12px;
+}
+
+/* ---- Recompensas por dificuldade ---- */
+.joey-rewards-block {
+  padding: 16px 20px;
+}
+.joey-rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.joey-reward-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.joey-reward-card-title {
+  margin-bottom: 10px;
+}
+.joey-reward-card-list {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-1);
+}
+.joey-reward-card-facil   { border-left: 3px solid var(--rank-D); }
+.joey-reward-card-medio   { border-left: 3px solid var(--rank-C); }
+.joey-reward-card-dificil { border-left: 3px solid var(--rank-S); }
+
+/* ---- Reward item (compartilhado entre rewards-by-diff, clã reward e final) ---- */
+.joey-reward-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.joey-reward-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+.joey-reward-text {
+  font-size: 0.85rem;
+  color: var(--text-1);
+  line-height: 1.3;
+}
+.joey-reward-qty {
+  color: var(--accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Recompensa final ---- */
+.joey-final-reward {
+  padding: 16px 20px;
+}
+.joey-final-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+.joey-final-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(255, 203, 5, 0.25);
+  border-radius: var(--radius-sm);
+}
+.joey-final-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.joey-final-text {
+  flex: 1;
+  min-width: 0;
+}
+.joey-final-name {
+  font-weight: 600;
+  color: var(--text-0);
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+.joey-final-desc {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+/* ---- Difficulty badges ---- */
+.joey-diff {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #fff;
+  white-space: nowrap;
+}
+.joey-diff-facil   { background: var(--rank-D); }
+.joey-diff-medio   { background: var(--rank-C); }
+.joey-diff-dificil { background: var(--rank-S); }
+
+/* ---- Clãs (grid responsivo: 2-3 por linha no desktop, 1 no mobile) ---- */
+.joey-clans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.joey-clan {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.joey-clan.is-complete {
+  border-color: rgba(94, 255, 144, 0.5);
+}
+.joey-clan-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.joey-clan-header:hover {
+  background: var(--bg-3);
+}
+.joey-clan.is-collapsed .joey-clan-header {
+  border-bottom: none;
+}
+.joey-chevron {
+  width: 16px;
+  display: inline-block;
+  transition: transform 0.15s ease;
+  color: var(--text-2);
+}
+.joey-clan.is-collapsed .joey-chevron {
+  transform: rotate(-90deg);
+}
+.joey-clan-icon {
+  font-size: 1.1rem;
+}
+.joey-clan-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.joey-clan-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-0);
+}
+.joey-clan-progress {
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  background: var(--bg-3);
+  border-radius: 999px;
+}
+.joey-clan.is-complete .joey-clan-progress {
+  color: #5eff90;
+  background: rgba(94, 255, 144, 0.1);
+}
+
+.joey-clan-body {
+  padding: 10px 14px 12px;
+}
+.joey-clan.is-collapsed .joey-clan-body {
+  display: none;
+}
+
+.joey-clan-reward {
+  padding: 10px 12px;
+  background: rgba(255, 203, 5, 0.06);
+  border: 1px solid rgba(255, 203, 5, 0.18);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+}
+.joey-clan-reward-label {
+  font-size: 0.82rem;
+  color: var(--text-1);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.joey-clan-reward-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+}
+
+/* ---- Pokémon row ---- */
+.joey-pokemon-list {
+  display: grid;
+  gap: 2px;
+}
+.joey-pokemon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+}
+.joey-pokemon:hover {
+  background: rgba(31, 36, 48, 0.4);
+}
+.joey-pokemon.is-captured {
+  opacity: 0.55;
+}
+.joey-pokemon.is-captured .joey-pokemon-name {
+  text-decoration: line-through;
+}
+.joey-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+.joey-pokemon-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.joey-pokemon-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-0);
+  font-weight: 500;
+}
+
+/* ---- Filtros ---- */
+.joey-clan.hidden,
+.joey-pokemon.hidden {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .joey-main {
+    padding: 16px 12px 60px;
+  }
+  .joey-clan-header {
+    flex-wrap: wrap;
+  }
+}

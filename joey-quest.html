@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joey Quest Tracker — PXG</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-joey">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="logo">
+        <a href="index.html" class="topbar-back" title="Voltar ao Hub">←</a>
+        <span class="logo-mark">PXG</span>
+        <span class="logo-text">Joey Quest Tracker</span>
+      </h1>
+      <div class="topbar-actions">
+        <a id="joeyWikiLink" class="btn btn-ghost" target="_blank" rel="noopener noreferrer"
+           title="Abrir página da Joey Quest na wiki">
+          📖 Joey Quest (Wiki ↗)
+        </a>
+        <button id="btnReset" class="btn btn-ghost" type="button"
+                title="Desmarcar todas as capturas">Resetar tudo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="joey-main">
+    <div class="joey-sticky-top">
+      <section class="panel joey-progress" aria-label="Progresso global">
+        <div class="joey-progress-text">
+          <span id="progressCount">0 / 0</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="joey-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="progressFill" class="joey-progress-fill"></div>
+        </div>
+      </section>
+
+      <section class="panel joey-controls" aria-label="Controles">
+        <div class="joey-controls-row">
+          <div class="joey-search-wrap">
+            <input id="searchPokemon" type="search"
+                   placeholder="Buscar pokémon ou clã (Ctrl+F)"
+                   autocomplete="off" />
+          </div>
+          <label class="check joey-hide-captured">
+            <input type="checkbox" id="hideCaptured" />
+            <span>🔍 Esconder capturados</span>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel joey-info" aria-label="Informações">
+      <div class="joey-info-row">
+        <span class="joey-info-item"><strong>NPC:</strong> <span id="joeyNpc">—</span></span>
+        <span class="joey-info-item"><strong>Local:</strong> <span id="joeyLocal">—</span></span>
+        <span class="joey-info-item"><strong>Level:</strong> <span id="joeyLevel">—</span></span>
+      </div>
+    </section>
+
+    <section class="panel joey-rewards-block" aria-label="Recompensas por dificuldade">
+      <h2 class="joey-section-title">🎁 Recompensas por dificuldade (por captura)</h2>
+      <div class="joey-rewards-grid" id="rewardsByDiff"></div>
+    </section>
+
+    <section class="panel joey-final-reward" aria-label="Recompensa final">
+      <h2 class="joey-section-title">🏆 Recompensa final da quest</h2>
+      <div class="joey-final-list" id="finalRewardList"></div>
+    </section>
+
+    <section class="panel panel-clans">
+      <div id="clansContainer" class="joey-clans">
+        <p class="loading">Carregando clãs...</p>
+      </div>
+      <p id="clansEmpty" class="empty hidden">Nenhum resultado.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="rainbow-toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer">
+    <p>
+      Dados extraídos da
+      <a href="https://wiki.pokexgames.com/index.php/Joey_Quest"
+         target="_blank" rel="noopener noreferrer">Joey Quest (Wiki PXG)</a>.
+      Projeto não oficial.
+    </p>
+  </footer>
+
+  <script src="joey-quest-data.js"></script>
+  <script src="joey-quest.js"></script>
+</body>
+</html>
