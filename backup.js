@@ -26,6 +26,8 @@
     "pxg-shared-resources-v1",
     "pxg-professor-craft-v1",
     "pxg-adventurer-craft-v1",
+    "pxg-engineer-craft-v1",
+    "pxg-stylist-craft-v1",
     "pxg-loot-v1",
   ];
 
